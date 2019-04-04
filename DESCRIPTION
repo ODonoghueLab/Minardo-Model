@@ -1,0 +1,22 @@
+Package: MinardoModel
+Type: Package
+Title: Order time-series clusters based on first events
+Version: 0.0.0
+Date: 2019-April-4
+Author: Sandeep Kaur
+Maintainer: Sandeep Kaur <crystalsand10@gmail.com>
+Description: We provide a package here, which builds upon clusters of high-throughput time-series data (such as time series phosphoproteomics or gene expression datasets). We enable calculating change within clusters at the quantified time points, calculating and plotting the 50% crossings (events), and ordering clusters based on when the events occur.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Imports:
+	multcomp,
+	gplots,
+	stats,
+	graphics,
+	grDevices,
+	methods,
+	igraph,
+	nem
+Suggests:
+	Mfuzz
+RoxygenNote: 6.1.1
