@@ -67,7 +67,7 @@ clustered <- cmeans(humphrey.stand, centers=17,  iter.max=100, m=1.25)
 hum.stand.eset <- new("ExpressionSet", exprs=humphrey.stand)
 mfuzz.plot2(hum.stand.eset, cl=clustered, mfrow=c(4,5), centre=TRUE)
 ```
-![Mfuzz clustering](images/mfuzzClustering.png)
+![Mfuzz clustering](images/Humphrey/humphrey_mfuzz.png)
 Fig. 1: Clusters generated using Mfuzz.
 
 
@@ -86,7 +86,7 @@ resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 
 ```
 
-![Heatmap](images/heatmap.png)
+![Heatmap](images/Humphrey/humphrey_heatmap.png)
 Fig. 2: Heatmap showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals have been greyed out.
 
 
@@ -107,7 +107,7 @@ Plotting 50% on the cluster plot
 plotClusters_fifty(humphrey.stand, clustered, mat_fiftyPoints, plotNumCol=5)
 
 ```
-
+![Clusters](images/Humphrey/humphrey_clusters_50.png)
 Fig. 3: Cluster plots with 50% crossing marked. The red indicate crossing in the upwards direction, hence phosphorylation and blue indicate crossing in the downwards direction, hence dephosphorylation.
 
 
@@ -123,6 +123,7 @@ plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.5)
 
 ```
 
+![Heatmap](images/Humphrey/humphrey_heatmap_50.png)
 Fig. 4: Heatmap with 50% crossing points overlaid
 
 
@@ -135,13 +136,18 @@ In the following function, an ordering is calculated (i.e. those occurring at st
 ```
 # Non-parametric test based ordering
 orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="wilcox")
+```
+![Clusters](images/Humphrey/humphrey_nonParam.png)
+Fig. 5: Clusters ordered by first event (where the events were calculated non-parametrically).
 
+```
 # Parametric test based ordering
 orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="t-test")
 
 ```
 
-Fig. 5: Clusters ordered by first event.
+![Clusters](images/Humphrey/humphrey_param.png)
+Fig. 6: Clusters ordered by first event (where the events were calculated parametrically).
 
 
 ### 6. Plot clusters using a single hue colour scheme.
@@ -153,8 +159,8 @@ In general, a rainbow colour scheme (which is commonly used to plot time-series 
 plotClusters(humphrey.stand, clustered)
 ```
 
-![Single hue clustering](images/singleHueClustering.png)
-Fig. 6: Cluster plots using a monochromatic colour scheme.
+![Single hue clustering](images/Humphrey/humphrey_clusters.png)
+Fig. 7: Cluster plots using a monochromatic colour scheme.
 
 
 ### References

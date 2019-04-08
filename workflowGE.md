@@ -36,6 +36,11 @@ ge.stand.eset <- new("ExpressionSet", exprs=ge.stand)
 mfuzz.plot2(ge.stand.eset, cl=clustered, mfrow=c(4,5), centre=TRUE)
 ```
 
+![Mfuzz clustering](images/Ge/ge_mfuzz.png)
+Fig. 1: Clusters generated using Mfuzz.
+
+
+
 #### 3. Quantifying change within clusters
 
 ```
@@ -48,6 +53,8 @@ glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, totalTimePoints
 ## Plot the z-scores as a heatmap.
 resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 ```
+![Heatmap](images/Ge/ge_heatmap.png)
+Fig. 2: Heatmap showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals have been greyed out.
 
 
 
@@ -61,10 +68,17 @@ mat_fiftyPoints <- calc50crossing(clustered)
 # Overlaying the 50% crossings on the heat map.
 plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.5)
 
+
 # Overlaying the 50% crossings on the cluster plot.
 plotClusters_fifty(ge.stand, clustered, mat_fiftyPoints)
 ```
+![Heatmap](images/Ge/ge_heatmap_50.png)
+Fig. 3: Heatmap with 50% crossing points overlaid
 
+
+
+![Clusters](images/Ge/ge_clusters_50.png)
+Fig. 4: Cluster plots with 50% crossing marked. The red indicate crossing in the upwards direction, hence phosphorylation and blue indicate crossing in the downwards direction, hence dephosphorylation.
 
 
 #### 5. Plotting events
@@ -78,11 +92,20 @@ orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="wilcox")
 orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="t-test")
 ```
 
+![Clusters](images/Ge/ge_nonParam.png)
+Fig. 5: Clusters ordered by first event (where the events were calculated non-parametrically).
+
+![Clusters](images/Ge/ge_param.png)
+Fig. 6: Clusters ordered by first event (where the events were calculated parametrically).
+
+
+
 
 To save the generated image as pdf (the width and height can be increased):
+
 ```
 pdf("ge_dups_wilcox.pdf", width = 10, height=8)
-orderTheEvents(ge.stand, clustered, mat_fiftyPoints)
+plotClusters(ge.stand, clustered)
 dev.off()
 ```
 
