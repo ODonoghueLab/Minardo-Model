@@ -99,7 +99,7 @@ Fig. 2: Heat map showing z-scores for each of the clusters (x-axis) at time-inte
 
 Phosphorylation and dephosphorylation are events, which occur when 50% abundance is crossed in the increasing or decreasing direction, respectively.
 
-```
+```R
 # Calculate the 50% crossings
 
 mat_fiftyPoints <- calc50crossing(clustered)
@@ -109,7 +109,7 @@ mat_fiftyPoints <- calc50crossing(clustered)
 
 Plotting the events on the cluster plot:
 
-```
+```R
 plotClusters_fifty(humphrey.stand, clustered, mat_fiftyPoints)
 
 ```
@@ -120,7 +120,7 @@ Fig. 3: Cluster plots with phosphorylation and dephosphorylation events, shown v
 
 Plotting the events on the z-score heat map:
 
-```
+```R
 
 plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints)
 
@@ -139,14 +139,14 @@ Fig. 4: The time-interval change indicating heat map (see Fig. 2), which now als
 In the following function, an ordering of clusters is calculated, based on events (i.e. phosphorylation and dephosphorylation). Briefly, the method is that, first a time distribution is generated for each cluster. These distributions are compared, either parametrically (t-tests) or non-parametrically (wilcox-test) to determine if the events are different, and if so, which occurs earlier. This gives us an ordering of the events, which are then laid out per cluster using a storyline visualisation style.
 
 
-```
+```R
 # Non-parametric test based ordering
 orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="wilcox")
 ```
 ![Clusters](images/Humphrey/humphrey_nonParam.png)
 Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). The events (depicted by dots) which are connected via gray dashed lines do not occur at significantly different times.
 
-```
+```R
 # Parametric test based ordering
 orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="t-test")
 

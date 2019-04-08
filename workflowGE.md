@@ -1,10 +1,10 @@
 # Demonstration on Gene Expression dataset
 
-In this document, we demonstrate how our package can also be applied to a wider variety of time series datasets, such as gene expression datasets.
+In this document, we demonstrate how our package can be utilised to order gene expression clusters.
 
 ### Dataset
 
-We utilise the dataset made available by Ma *et al.* [1]. We downloaded the raw data from GEO (Gene Expression Omnibus) with the identifier GSE40565 and considered only the time-series arrays. We then obtained the differentially expressed genes from the seven time points (including basal) by following the section 'Microarray analysis' in the paper. This resulted in 2566 profiles, which we make available as a sample dataset.  
+We utilise the dataset made available by Ma *et al.* [1]. We downloaded the raw data from GEO (Gene Expression Omnibus) with the identifier GSE40565 and considered only the time-series arrays. We then obtained the differentially expressed genes from the seven time points (including basal) by following the section 'Microarray analysis' in the paper [1]. This resulted in 2,566 profiles, which we make available as a sample dataset in this package.  
 
 ### Workflow
 
@@ -12,7 +12,7 @@ Overall, the work flow is very similar to the time-series phosphoproteomics data
 
 #### 1. Load the dataset and standardise it
 
-```
+```R
 # Load the data.
 data(ge)
 
@@ -26,7 +26,7 @@ remove(tmp)
 
 #### 2. Clustering using Mfuzz
 
-```
+```R
 library(Mfuzz)
 
 clustered <- cmeans(ge.stand, centers=20,  iter.max=200, m=1.25) # paper, 2014_ma_etal, says 20 clusters.
@@ -43,7 +43,9 @@ Fig. 1: Clusters generated using Mfuzz.
 
 #### 3. Quantifying change within clusters
 
-```
+Change within a cluster at the various time intervals can be quantified as follows:
+
+```R
 # Create and run, for each cluster, a generalised linear model and carry out tukey post-hoc evaluations.
 glmTukeyForEachClus <- calcClusterChng(ge.stand, clustered)
 
@@ -58,52 +60,52 @@ Fig. 2: Heatmap showing z-scores for each of the clusters (x-axis) at time-inter
 
 
 
-#### 4. Determine events
+#### 4. Calculate events
 
-```
+```R
 # Calculate 50% crossings (time and direction at the 50% abundance)
 mat_fiftyPoints <- calc50crossing(clustered)
 
 
 # Overlaying the 50% crossings on the heat map.
-plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.5)
-
-
-# Overlaying the 50% crossings on the cluster plot.
-plotClusters_fifty(ge.stand, clustered, mat_fiftyPoints)
+plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints)
 ```
+
 ![Heatmap](images/Ge/ge_heatmap_50.png)
 Fig. 3: Heatmap with 50% crossing points overlaid
 
-
+```R
+# Overlaying the 50% crossings on the cluster plot.
+plotClusters_fifty(ge.stand, clustered, mat_fiftyPoints)
+```
 
 ![Clusters](images/Ge/ge_clusters_50.png)
-Fig. 4: Cluster plots with 50% crossing marked. The red indicate crossing in the upwards direction, hence phosphorylation and blue indicate crossing in the downwards direction, hence dephosphorylation.
+Fig. 4: Cluster plots with 50% crossing marked. The red indicate crossing in the upwards direction and blue indicate crossing in the downwards direction.
 
 
-#### 5. Plotting events
-In the following function, an ordering is calculated (i.e. those occurring at statistically significantly different times) and a figure is generated where the clusters are ordered by occurrence of first event.
+#### 5. Ordering events
 
-```
+
+```R
 # Non-parametric test based ordering
 orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="wilcox")
+```
+![Clusters](images/Ge/ge_nonParam.png)
+Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). The events (depicted by dots) which are connected via gray dashed lines do not occur at significantly different times.
 
+
+```R
 # Parametric test based ordering
 orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="t-test")
 ```
 
-![Clusters](images/Ge/ge_nonParam.png)
-Fig. 5: Clusters ordered by first event (where the events were calculated non-parametrically).
-
 ![Clusters](images/Ge/ge_param.png)
-Fig. 6: Clusters ordered by first event (where the events were calculated parametrically).
-
-
+Fig. 6: Clusters ordered by first event (where the event ordering was calculated parametrically). Similarly to Fig. 5, those events which are connected via gray dashed lines do not occur at significantly different times.
 
 
 To save the generated image as pdf (the width and height can be increased):
 
-```
+```R
 pdf("ge_dups_wilcox.pdf", width = 10, height=8)
 plotClusters(ge.stand, clustered)
 dev.off()
