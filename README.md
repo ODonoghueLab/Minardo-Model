@@ -2,13 +2,15 @@
 
 An R package for ordering of time-series clusters based on events.
 
-This package provides two major features for further analysing clusters:
-1. The ability to statistically evaluate change occurring in the time intervals of the clusters.
-2. We provide strategies for defining events (eg. phosphorylation and dephosphorylation) based on 50% abundance.  
+This package provides three major analysis techniques for clusters:
+1. Statistically evaluate change occurring in the time intervals within clusters.
+2. Strategy for defining events (eg. phosphorylation and dephosphorylation) based on 50% abundance.  
+3. Order and layout clusters based on the first occurrence of such events.
 
-Furthermore, this paper also presents an alternative cluster plot based on a constant low opacity color.
+Furthermore, this package also presents an alternative colour scheme of cluster plot, which is based on a constant low opacity color.
 
-The methods presented here can be applied to a wider variety of time-series high-throughput molecular biology datasets. Below is presented the application to a phosphoproteomics dataset. Workflow for application to gene expression datasets can be found in this [link](workflowGE.md).
+
+The methods presented here can be applied to a wider variety of time-series high-throughput molecular biology datasets. In the rest of this document, application to a phosphoproteomics dataset is presented. For application to a gene expression dataset, follow [this link](workflowGE.md).
 
 
 
@@ -16,7 +18,7 @@ The methods presented here can be applied to a wider variety of time-series high
 
 #### Prerequisite - Mfuzz
 
-The MinardoModel package builds on the clusters of time-profiles generated via the Mfuzz package, which implements the fuzzy c-means (FCM) clustering algorithm. It is available through Bioconductor. If you don't have it installed, follow the instructions below, or follow the official website ([link](10.18129/B9.bioc.Mfuzz)).
+The MinardoModel package builds on clustered time-profiles. Time series phosphoproteomics datasets are generally clustered using the FCM algorithm, which is implemented in R in the Mfuzz package. Mfuzz is available through Bioconductor. If you don't have it installed, follow the instructions below, or follow the official website ([link](10.18129/B9.bioc.Mfuzz)).
 ```R
 # Installing Mfuzz
 source("https://bioconductor.org/biocLite.R")
@@ -28,7 +30,7 @@ biocLite("Mfuzz")
 ## Example workflow
 
 ### 1. Load the dataset and standardise it.
-An example dataset, taken from Humphrey *et al.* [1], contains phospho-proteomics profiles measured over 9 time-points (including basal).
+An example dataset taken from Humphrey *et al.* [1], contains phospho-proteomics profiles measured over 9 time-points (including basal).
 
 ```R
 
@@ -36,14 +38,16 @@ An example dataset, taken from Humphrey *et al.* [1], contains phospho-proteomic
 data(humphrey_noDup)
 ```
 
-The loaded data contains 3172 profiles. These profiles have been filtered from the originally published dataset [1], as follows:
+The loaded data contains 3,172 profiles. These profiles have been filtered from the originally published dataset [1] (which consisted of 37,248 profiles), as follows:
 
 1. Phosphorylation changes were quantified at all measured time  points (i.e. values are present at all measured time points).
-2. FDR correction was performed.
+2. Sites were differentially altered (detemined by performing empirical Bayes modelling and moderated t-tests, followed by FDR correction).
 3. At at-least one quantified time-point there is a 2-fold increase or 1/2-fold decrease.
 
 
 #### Standardisation
+
+These 3,172 profiles can be standardised as follows:
 
 ```R
 
@@ -55,6 +59,7 @@ remove(tmp)
 ```
 
 ### 2. Generate clusters using Mfuzz
+These standardised data are clustered using the Mfuzz package, as follows.
 
 ```R
 # Load the Mfuzz library for clustering
@@ -68,7 +73,7 @@ hum.stand.eset <- new("ExpressionSet", exprs=humphrey.stand)
 mfuzz.plot2(hum.stand.eset, cl=clustered, mfrow=c(4,5), centre=TRUE)
 ```
 ![Mfuzz clustering](images/Humphrey/humphrey_mfuzz.png)
-Fig. 1: Clusters generated using Mfuzz.
+Fig. 1: Cluster plots of 3,172 profiles from Humphrey *et al.*, generated using Mfuzz.
 
 
 
@@ -81,13 +86,13 @@ glmTukeyForEachClus <- calcClusterChng(humphrey.stand, clustered)
 # Extract z-scores and p-values.
 glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, totalTimePoints=9)
 
-# Plot the z-scores as a heatmap.
+# Plot the z-scores as a heat map.
 resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 
 ```
 
-![Heatmap](images/Humphrey/humphrey_heatmap.png)
-Fig. 2: Heatmap showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals have been greyed out.
+![Heat map](images/Humphrey/humphrey_heatmap.png)
+Fig. 2: Heat map showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals have been greyed out.
 
 
 ### 4. Determine events
@@ -102,29 +107,28 @@ mat_fiftyPoints <- calc50crossing(clustered)
 ```
 
 
-Plotting 50% on the cluster plot
+Plotting the events on the cluster plot:
+
 ```
 plotClusters_fifty(humphrey.stand, clustered, mat_fiftyPoints, plotNumCol=5)
 
 ```
 ![Clusters](images/Humphrey/humphrey_clusters_50.png)
-Fig. 3: Cluster plots with 50% crossing marked. The red indicate crossing in the upwards direction, hence phosphorylation and blue indicate crossing in the downwards direction, hence dephosphorylation.
+Fig. 3: Cluster plots with phosphorylation and dephosphorylation events, shown via red and blue dots, respectively. The black dashed horizonal line indiates the 50% abundance of the centroid (the bold back line at the center of a cluster).
 
 
 
-
-Plotting 50% on the heatmap.
+Plotting the events on the z-score heat map.
 
 ```
-# Calculate segments of centroids and plot on heatmap.
 
 plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.5)
 
 
 ```
 
-![Heatmap](images/Humphrey/humphrey_heatmap_50.png)
-Fig. 4: Heatmap with 50% crossing points overlaid
+![Heat map](images/Humphrey/humphrey_heatmap_50.png)
+Fig. 4: The time-interval change indicating heat map (see Fig. 2), which now also depicts phosphorylation and dephosphorylation events, via red and blue lines, respectively.
 
 
 
@@ -132,13 +136,15 @@ Fig. 4: Heatmap with 50% crossing points overlaid
 
 ### 5. Ordered events
 
-In the following function, an ordering is calculated (i.e. those occurring at statistically significantly different times) and a figure is generated where the clusters are ordered by occurrence of first event.
+In the following function, an ordering of clusters is calculated, based on events (i.e. phosphorylation and dephosphorylation). A time distribution is generated for each cluster, and the distributions can be compared, either parametrically (t-tests) or non-parametrically (wilcox-test) to determine the ordering of these events, and thus clusters.
+
+
 ```
 # Non-parametric test based ordering
 orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="wilcox")
 ```
 ![Clusters](images/Humphrey/humphrey_nonParam.png)
-Fig. 5: Clusters ordered by first event (where the events were calculated non-parametrically).
+Fig. 5: Clusters ordered by first event (where the events were calculated non-parametrically). The events (depicted by dots), which are connected via gray dashed lines occur at the same time.
 
 ```
 # Parametric test based ordering
@@ -147,7 +153,7 @@ orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="t-test")
 ```
 
 ![Clusters](images/Humphrey/humphrey_param.png)
-Fig. 6: Clusters ordered by first event (where the events were calculated parametrically).
+Fig. 6: Clusters ordered by first event (where the events were calculated parametrically). Similarly to Fig. 5, the events (depicted by dots), which are connected via gray dashed lines occur at the same time. 
 
 
 ### 6. Plot clusters using a single hue colour scheme.
