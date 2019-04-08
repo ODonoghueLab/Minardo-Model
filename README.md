@@ -42,12 +42,12 @@ The loaded data contains 3,172 profiles. These profiles have been filtered from 
 
 1. Phosphorylation changes were quantified at all measured time  points (i.e. values are present at all measured time points).
 2. Sites were differentially altered (detemined by performing empirical Bayes modelling and moderated t-tests, followed by FDR correction).
-3. At at-least one quantified time-point there is a 2-fold increase or 1/2-fold decrease.
+3. At at-least one quantified time-point there is a 2-fold change.
 
 
 #### Standardisation
 
-These 3,172 profiles can be standardised as follows:
+We start by standardising abundance rations, as follows:
 
 ```R
 
@@ -59,7 +59,7 @@ remove(tmp)
 ```
 
 ### 2. Generate clusters using Mfuzz
-These standardised data are clustered using the Mfuzz package, as follows.
+These standardised data can then be clustered using the Mfuzz package, as follows.
 
 ```R
 # Load the Mfuzz library for clustering
@@ -153,7 +153,7 @@ orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="t-test")
 ```
 
 ![Clusters](images/Humphrey/humphrey_param.png)
-Fig. 6: Clusters ordered by first event (where the events were calculated parametrically). Similarly to Fig. 5, the events (depicted by dots), which are connected via gray dashed lines occur at the same time. 
+Fig. 6: Clusters ordered by first event (where the events were calculated parametrically). Similarly to Fig. 5, the events (depicted by dots), which are connected via gray dashed lines occur at the same time.
 
 
 ### 6. Plot clusters using a single hue colour scheme.
