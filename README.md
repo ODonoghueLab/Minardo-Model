@@ -110,7 +110,7 @@ mat_fiftyPoints <- calc50crossing(clustered)
 Plotting the events on the cluster plot:
 
 ```
-plotClusters_fifty(humphrey.stand, clustered, mat_fiftyPoints, plotNumCol=5)
+plotClusters_fifty(humphrey.stand, clustered, mat_fiftyPoints)
 
 ```
 ![Clusters](images/Humphrey/humphrey_clusters_50.png)
@@ -118,11 +118,11 @@ Fig. 3: Cluster plots with phosphorylation and dephosphorylation events, shown v
 
 
 
-Plotting the events on the z-score heat map.
+Plotting the events on the z-score heat map:
 
 ```
 
-plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.5)
+plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints)
 
 
 ```
@@ -144,7 +144,7 @@ In the following function, an ordering of clusters is calculated, based on event
 orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="wilcox")
 ```
 ![Clusters](images/Humphrey/humphrey_nonParam.png)
-Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). Those events (depicted by dots) which are connected via gray dashed lines do not occur at significantly different times.
+Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). The events (depicted by dots) which are connected via gray dashed lines do not occur at significantly different times.
 
 ```
 # Parametric test based ordering
