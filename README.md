@@ -47,7 +47,7 @@ The loaded data contains 3,172 profiles. These profiles have been filtered from 
 
 #### Standardisation
 
-We start by standardising abundance rations, as follows:
+After loading the data, the next step is standardising the abundance ratios, as follows:
 
 ```R
 
@@ -59,7 +59,7 @@ remove(tmp)
 ```
 
 ### 2. Generate clusters using Mfuzz
-These standardised data can then be clustered using the Mfuzz package, as follows.
+These standardised data can then be clustered using the Mfuzz package, as follows:
 
 ```R
 # Load the Mfuzz library for clustering
@@ -92,7 +92,7 @@ resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 ```
 
 ![Heat map](images/Humphrey/humphrey_heatmap.png)
-Fig. 2: Heat map showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals have been greyed out.
+Fig. 2: Heat map showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals are greyed out.
 
 
 ### 4. Determine events
@@ -136,7 +136,7 @@ Fig. 4: The time-interval change indicating heat map (see Fig. 2), which now als
 
 ### 5. Ordered events
 
-In the following function, an ordering of clusters is calculated, based on events (i.e. phosphorylation and dephosphorylation). A time distribution is generated for each cluster, and the distributions can be compared, either parametrically (t-tests) or non-parametrically (wilcox-test) to determine the ordering of these events, and thus clusters.
+In the following function, an ordering of clusters is calculated, based on events (i.e. phosphorylation and dephosphorylation). Briefly, the method is that, first a time distribution is generated for each cluster. These distributions are compared, either parametrically (t-tests) or non-parametrically (wilcox-test) to determine if the events are different, and if so, which occurs earlier. This gives us an ordering of the events, which are then laid out per cluster using a storyline visualisation style.
 
 
 ```
@@ -144,7 +144,7 @@ In the following function, an ordering of clusters is calculated, based on event
 orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="wilcox")
 ```
 ![Clusters](images/Humphrey/humphrey_nonParam.png)
-Fig. 5: Clusters ordered by first event (where the events were calculated non-parametrically). The events (depicted by dots), which are connected via gray dashed lines occur at the same time.
+Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). Those events (depicted by dots) which are connected via gray dashed lines do not occur at significantly different times.
 
 ```
 # Parametric test based ordering
@@ -153,7 +153,7 @@ orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="t-test")
 ```
 
 ![Clusters](images/Humphrey/humphrey_param.png)
-Fig. 6: Clusters ordered by first event (where the events were calculated parametrically). Similarly to Fig. 5, the events (depicted by dots), which are connected via gray dashed lines occur at the same time.
+Fig. 6: Clusters ordered by first event (where the event ordering was calculated parametrically). Similarly to Fig. 5, those events which are connected via gray dashed lines do not occur at significantly different times.
 
 
 ### 6. Plot clusters using a single hue colour scheme.
