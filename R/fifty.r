@@ -43,6 +43,7 @@ calc50crossing <- function(clustered){
 	}
 
 	mat_fiftyPoints <- mat_fiftyPoints[-1,]
+	return(mat_fiftyPoints) 
 }
 
 
