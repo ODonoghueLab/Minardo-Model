@@ -31,6 +31,8 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	test_param = "t-test"
 	test_nonParam = "wilcox"
 
+	title_testType = ""
+
 	stopifnot(is(Tc, "matrix"), is(clustered, "fclust"), is(mat_fiftyPoints, "matrix"))
 
 	if (!(test == test_param) && !(test == test_nonParam)){
@@ -53,10 +55,13 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 		print ("Running wilcoxon test.")
 		list_pVal_stat <- performWilcoxonSignedRankTabular(list_distributions)
 
+		title_testType = "(Non-parametric)"
 	}
 	else {
 		print("Running t-test.")
 		list_pVal_stat <- performTtestsTabular(list_distributions)
+
+		title_testType = "(Parametric)"
 	}
 
 	# FDR adjustment for multiple testing.
@@ -79,7 +84,7 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	net = igraph::graph_from_adjacency_matrix(reducted, mode="directed")
 
 	list_eventsOrder <- getEventsOrderInGraph(reducted, net) # computing the order of the events in the mat_fiftyPoints based on a bfs search.
-	# print(list_eventsOrder)
+	mat_fiftyPts_withOrder <- appendOrder(mat_fiftyPoints, list_eventsOrder)
 
 	## Getting other things ready for plotting
 	# if (FALSE){
@@ -91,7 +96,9 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 	# plotting
 
-	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", pch=19, col=mat_eventPoints[,cols_matFifty$col_dir], xlab="Time", ylab="Cluster",  main="Clusters ordered by significant order of occurance of events", xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n")
+
+
+	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", pch=19, col=mat_eventPoints[,cols_matFifty$col_dir], xlab="Time", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n")
 	graphics::axis(side=2, at=seq(1,length(vec_labels)), labels=rev(vec_labels))
 
 
@@ -100,6 +107,20 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col=mat_grayLines[,cols_clusPlotObjs$col_col], lty="dashed")
 	# }
 
+	return (mat_fiftyPts_withOrder)
+}
+
+
+appendOrder <- function(mat_fiftyPoints, list_eventsOrder){
+
+	mat_withOrder <- cbind(mat_fiftyPoints, rep(0,nrow(mat_fiftyPoints)))
+
+	for (i in 1:length(list_eventsOrder)){
+		eventNum <- list_eventsOrder[[i]]
+		mat_withOrder[eventNum, cols_orderedEvents$col_order] = i
+	}
+
+	return(mat_withOrder)
 }
 
 ################################## AUXILLARY

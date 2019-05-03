@@ -18,7 +18,7 @@ The methods presented here can be applied to a wider variety of time-series high
 
 #### Prerequisite - Mfuzz
 
-The MinardoModel package builds on clustered time-profiles. Time series phosphoproteomics datasets are generally clustered using the FCM algorithm, which is implemented in R in the Mfuzz package. Mfuzz is available through Bioconductor. If you don't have it installed, follow the instructions below, or follow the official website ([link](10.18129/B9.bioc.Mfuzz)).
+The MinardoModel package builds on clustered time-profiles. Time series phosphoproteomics datasets are generally clustered using the FCM algorithm, which is implemented in R in the Mfuzz package. Mfuzz is available through Bioconductor. If you don't have it installed, follow the instructions below, or follow the official website ([link](https://doi.org/doi:10.18129/B9.bioc.Mfuzz)).
 ```R
 # Installing Mfuzz
 source("https://bioconductor.org/biocLite.R")
@@ -86,13 +86,16 @@ glmTukeyForEachClus <- calcClusterChng(humphrey.stand, clustered)
 # Extract z-scores and p-values.
 glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, totalTimePoints=9)
 
-# Plot the z-scores as a heat map.
+# Plot the z-scores as a heat map (as seen in Fig. 2).
 resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 
 ```
 
 ![Heat map](images/Humphrey/humphrey_heatmap.png)
 Fig. 2: Heat map showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals are greyed out.
+
+The plotZP function returns a matrix, ``resWithOnlySignif``, which consists of z-scores where p-value < 0.5 (or the p-value supplied as input to the function).
+
 
 
 ### 4. Determine events
@@ -141,19 +144,22 @@ In the following function, an ordering of clusters is calculated, based on event
 
 ```R
 # Non-parametric test based ordering
-orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="wilcox")
+mat_fiftyPts_withOrder <- orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="wilcox")
 ```
 ![Clusters](images/Humphrey/humphrey_nonParam.png)
 Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). The events (depicted by dots) which are connected via gray dashed lines do not occur at significantly different times.
 
 ```R
 # Parametric test based ordering
-orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="t-test")
+mat_fiftyPts_withOrder <- orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints, test="t-test")
 
 ```
 
 ![Clusters](images/Humphrey/humphrey_param.png)
 Fig. 6: Clusters ordered by first event (where the event ordering was calculated parametrically). Similarly to Fig. 5, those events which are connected via gray dashed lines do not occur at significantly different times.
+
+The function ``orderTheEvents`` returns the ordering of the various events in the clusters appended to mat_fiftyPoints.
+
 
 
 ### 6. Plot clusters using a single hue colour scheme.
