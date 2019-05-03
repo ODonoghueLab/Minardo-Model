@@ -88,7 +88,7 @@ Fig. 4: Cluster plots with 50% crossing marked. The red indicate crossing in the
 
 ```R
 # Non-parametric test based ordering
-orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="wilcox")
+mat_fiftyPts_withOrder <- orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="wilcox")
 ```
 ![Clusters](images/Ge/ge_nonParam.png)
 Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). The events (depicted by dots) which are connected via gray dashed lines do not occur at significantly different times.
@@ -96,7 +96,7 @@ Fig. 5: Clusters ordered by first event (where the event ordering was calculated
 
 ```R
 # Parametric test based ordering
-orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="t-test")
+mat_fiftyPts_withOrder <- orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="t-test")
 ```
 
 ![Clusters](images/Ge/ge_param.png)

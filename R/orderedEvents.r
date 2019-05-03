@@ -15,7 +15,7 @@
 #' @param fdrSignif The significant cutoff for FDR correction (performed on a p-value matrix (see above)).
 #'
 #'
-#' @return Figure - containing the ordered clusters by occurance of first event.
+#' @return A figure containing the ordered clusters by occurance of first event is generated. Along with this, returned is a matrix, similar to the mat_fiftyPoints matrix, where an additional column is appended containing the order of occurance of the corresponding event.
 #'
 #'
 #' @importFrom methods is

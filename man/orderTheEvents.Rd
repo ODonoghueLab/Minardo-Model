@@ -23,7 +23,7 @@ orderTheEvents(Tc, clustered, mat_fiftyPoints, test = "wilcox",
 \item{fdrSignif}{The significant cutoff for FDR correction (performed on a p-value matrix (see above)).}
 }
 \value{
-Figure - containing the ordered clusters by occurance of first event.
+A figure containing the ordered clusters by occurance of first event is generated. Along with this, returned is a matrix, similar to the mat_fiftyPoints matrix, where an additional column is appended containing the order of occurance of the corresponding event.
 }
 \description{
 Here, the events identified from the centroids are used to generate time-distributions using profiles in the clusters. From these distributions, a matrix (either by running t-test or wilcox) is generated of the p-values and the t-statistic (or the 95\% confidence interval, respectively). The p-values are FDR corrected and are used to define a graph, where events with significant time differences are ordered according to the t-statistic (for t-test) or the 95\% confidence interval (for wilcox test). This matrix is transitively reduced and is used to generate the ordering and the resulting figure.
