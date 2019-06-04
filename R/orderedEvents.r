@@ -98,13 +98,13 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 
 
-	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", pch=19, col=mat_eventPoints[,cols_matFifty$col_dir], xlab="Time", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n")
+	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=3, pch=19, col=mat_eventPoints[,cols_matFifty$col_dir], xlab="Time", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n")
 	graphics::axis(side=2, at=seq(1,length(vec_labels)), labels=rev(vec_labels))
 
 
-	graphics::segments(x0=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_y1]), col=mat_clusConnLines[,cols_clusPlotObjs$col_col])
+	graphics::segments(x0=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_y1]), col=mat_clusConnLines[,cols_clusPlotObjs$col_col], lwd=3)
 
-	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col=mat_grayLines[,cols_clusPlotObjs$col_col], lty="dashed")
+	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col=mat_grayLines[,cols_clusPlotObjs$col_col], lty="dashed", lwd=0.5)
 	# }
 
 	return (mat_fiftyPts_withOrder)
@@ -456,7 +456,7 @@ getGrayLines <- function(mat_eventPoints, signifs){
 			if (i != j){
 				if (signifs[j, i] == FALSE){
 					# draw a gray50 line between the i and j events
-					rowVal <-  c(mat_eventPoints[i, cols_matFifty$col_x], mat_eventPoints[i, cols_matFifty$col_y], mat_eventPoints[j, cols_matFifty$col_x], mat_eventPoints[j, cols_matFifty$col_y], "gray50")
+					rowVal <-  c(mat_eventPoints[i, cols_matFifty$col_x], mat_eventPoints[i, cols_matFifty$col_y], mat_eventPoints[j, cols_matFifty$col_x], mat_eventPoints[j, cols_matFifty$col_y], "red")
 					theGrayLines <- rbind(theGrayLines, rowVal)
 				}
 			}
@@ -584,10 +584,10 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs){
 
 			# assigning color
 			if (mat_fiftyPoints[eventNum, cols_matFifty$col_dir] == 1){
-				mat_eventPoints[eventNum, cols_matFifty$col_dir] = "red"
+				mat_eventPoints[eventNum, cols_matFifty$col_dir] = colors_orderedEvents[['incr']]
 			}
 			else{
-				mat_eventPoints[eventNum, cols_matFifty$col_dir] = "blue"
+				mat_eventPoints[eventNum, cols_matFifty$col_dir] = colors_orderedEvents[['decr']]
 			}
 
 			# assigning cluster number
