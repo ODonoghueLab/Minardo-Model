@@ -5,7 +5,9 @@ cols_clusPlotObjs = list(col_x0 = 1, col_y0 =2, col_x1 = 3, col_y1 = 4, col_col 
 
 cols_orderedEvents = c(cols_matFifty, col_order=5)
 
-colors_orderedEvents <- vector(mode="list", length=3)
-names(colors_orderedEvents) <- c("incr", "decr")
-colors_orderedEvents[[1]] <- "#989898" # incr - dark gray
-colors_orderedEvents[[2]] <- "#DCDCDC" # decr - light gray
+
+colors_orderedEvents = list(incr = "#989898", decr="#DCDCDC")
+# colors_orderedEvents <- vector(mode="list", length=3)
+# names(colors_orderedEvents) <- c("incr", "decr")
+# colors_orderedEvents[[1]] <- "#989898" # incr - dark gray
+# colors_orderedEvents[[2]] <- "#DCDCDC" # decr - light gray

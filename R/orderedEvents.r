@@ -469,15 +469,13 @@ getGrayLines <- function(mat_eventPoints, signifs){
 
 getClusConnLines <- function(mat_eventPoints){
 	mat_clusConnLines = matrix(ncol=5,nrow=nrow(mat_eventPoints))
+	mat_basalConnLines = matrix(ncol=5,nrow=max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))) # only need 1 for each cluster
 
-	# cols_clusPlotObjs$col_x0 <- 1
-	# cols_clusPlotObjs$col_y0 <- 2
-	# cols_clusPlotObjs$col_x1 <- 3
-	# cols_clusPlotObjs$col_y1 <- 4
-	# cols_clusPlotObjs$col_col <- 5
-
+	basalCounter = 1
+	prevClus = -1
 
 	for(i in 1:nrow(mat_eventPoints)){
+
 
 		# adding start point
 		mat_clusConnLines[i, cols_clusPlotObjs$col_x0] <- mat_eventPoints[i, cols_matFifty$col_x]
@@ -494,12 +492,58 @@ getClusConnLines <- function(mat_eventPoints){
 		# adding color
 		mat_clusConnLines[i, cols_clusPlotObjs$col_col] <- mat_eventPoints[i, cols_matFifty$col_dir]
 
+
+		## handling the adding of the basal
+		if (prevClus == -1 ){
+			# just store everything
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x0] = -1;
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x1] = mat_clusConnLines[i, cols_clusPlotObjs$col_x0];
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_y0] = mat_clusConnLines[i, cols_clusPlotObjs$col_y0];
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_y1] = mat_clusConnLines[i, cols_clusPlotObjs$col_y1];
+
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_col]  <- getOppColor(mat_eventPoints[i, cols_matFifty$col_dir])
+
+			prevClus = mat_eventPoints[i,cols_matFifty$col_clus]
+			print(prevClus)
+		}
+		else if (prevClus == as.integer(mat_eventPoints[i,cols_matFifty$col_clus])){
+			# update x if smaller (and then also color to be opposite)
+
+			if (as.numeric(mat_clusConnLines[i, cols_clusPlotObjs$col_x0]) < as.numeric(mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x1]) ){
+				mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x0] = mat_clusConnLines[i, cols_clusPlotObjs$col_x0];
+				mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_col]  <- getOppColor(mat_eventPoints[i, cols_matFifty$col_dir])
+			}
+		}
+		else if (prevClus !=  mat_eventPoints[i,cols_matFifty$col_clus]){
+			prevClus = mat_eventPoints[i,cols_matFifty$col_clus]
+			basalCounter = basalCounter + 1
+			# store everything again
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x0] = -1;
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x1] = mat_clusConnLines[i, cols_clusPlotObjs$col_x0];
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_y0] = mat_clusConnLines[i, cols_clusPlotObjs$col_y0];
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_y1] = mat_clusConnLines[i, cols_clusPlotObjs$col_y1];
+
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_col]  <- getOppColor(mat_eventPoints[i, cols_matFifty$col_dir])
+
+
+		}
+
 	}
 
+	mat_clusConnLines = rbind(mat_clusConnLines, mat_basalConnLines)
+	print(mat_clusConnLines)
+	# print(mat_eventPoints)
 	return (mat_clusConnLines)
 
 }
 
+getOppColor <- function (thisCol){
+	if (thisCol == colors_orderedEvents$incr){
+		return (colors_orderedEvents$decr)
+	}
+
+	return (colors_orderedEvents$incr)
+}
 
 getTheEndX <- function(mat_eventPoints, eventNum, defaultEndX){
 	endX <- defaultEndX
