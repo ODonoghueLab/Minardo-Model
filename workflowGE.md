@@ -4,11 +4,11 @@ In this document, we demonstrate how our package can be utilised to order gene e
 
 ### Dataset
 
-We utilise the dataset made available by Ma *et al.* [1]. We downloaded the raw data from GEO (Gene Expression Omnibus) with the identifier GSE40565 and considered only the time-series arrays. We then obtained the differentially expressed genes from the seven time points (including basal) by following the section 'Microarray analysis' in the paper [1]. This resulted in 2,566 profiles, which we make available as a sample dataset in this package.  
+We utilise the dataset made available by Ma *et al.* [1]. We downloaded the raw data from GEO (Gene Expression Omnibus) with the identifier GSE40565 and considered only the time-series arrays. We then obtained the differentially expressed genes from the seven time points (including basal) by following the section 'Microarray analysis' in Ma *et al.* [1]. This resulted in 2,566 profiles, which we make available as a sample dataset in this package.  
 
 ### Workflow
 
-Overall, the work flow is very similar to the time-series phosphoproteomics datasets.
+The work flow is very similar to the workflow for the time-series phosphoproteomics datasets.
 
 #### 1. Load the dataset and standardise it
 
@@ -32,12 +32,11 @@ library(Mfuzz)
 clustered <- cmeans(ge.stand, centers=20,  iter.max=200, m=1.25) # paper, 2014_ma_etal, says 20 clusters.
 
 # Plotting the clusters
-ge.stand.eset <- new("ExpressionSet", exprs=ge.stand)
-mfuzz.plot2(ge.stand.eset, cl=clustered, mfrow=c(4,5), centre=TRUE)
+plotClusters(ge.stand, clustered)
 ```
 
 ![Mfuzz clustering](images/Ge/ge_mfuzz.png)
-Fig. 1: Clusters generated using Mfuzz.
+Fig. 1: Clusters of gene expression dataset.  
 
 
 
@@ -56,7 +55,7 @@ glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, totalTimePoints
 resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 ```
 ![Heatmap](images/Ge/ge_heatmap.png)
-Fig. 2: Heatmap showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals have been greyed out.
+Fig. 2: Heatmap showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals are shown in grey.
 
 
 
@@ -80,7 +79,7 @@ plotClusters_fifty(ge.stand, clustered, mat_fiftyPoints)
 ```
 
 ![Clusters](images/Ge/ge_clusters_50.png)
-Fig. 4: Cluster plots with 50% crossing marked. The red indicate crossing in the upwards direction and blue indicate crossing in the downwards direction.
+Fig. 4: Cluster plots with phosphorylation and dephosphorylation events marked marked, in red and blue respectively.
 
 
 #### 5. Ordering events
@@ -91,7 +90,7 @@ Fig. 4: Cluster plots with 50% crossing marked. The red indicate crossing in the
 mat_fiftyPts_withOrder <- orderTheEvents(ge.stand, clustered, mat_fiftyPoints, test="wilcox")
 ```
 ![Clusters](images/Ge/ge_nonParam.png)
-Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). The events (depicted by dots) which are connected via gray dashed lines do not occur at significantly different times.
+Fig. 5: Clusters ordered by first event (where the event ordering was calculated non-parametrically). The events (depicted by dots) which are connected via red dashed lines do not occur at significantly different times.
 
 
 ```R
@@ -100,13 +99,13 @@ mat_fiftyPts_withOrder <- orderTheEvents(ge.stand, clustered, mat_fiftyPoints, t
 ```
 
 ![Clusters](images/Ge/ge_param.png)
-Fig. 6: Clusters ordered by first event (where the event ordering was calculated parametrically). Similarly to Fig. 5, those events which are connected via gray dashed lines do not occur at significantly different times.
+Fig. 6: Clusters ordered by first event (where the event ordering was calculated parametrically). Similarly to Fig. 5, those events which are connected via red dashed lines do not occur at significantly different times.
 
 
-To save the generated image as pdf (the width and height can be increased):
+As a side note, generated images can be saved as pdf and the width and height adjusted:
 
 ```R
-pdf("ge_dups_wilcox.pdf", width = 10, height=8)
+pdf("ge_dups_wilcox.pdf", width = 16, height=4)
 plotClusters(ge.stand, clustered)
 dev.off()
 ```
