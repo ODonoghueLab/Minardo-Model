@@ -1,4 +1,6 @@
-#' Prints a plot of clusters using a monochromatic low opacity gray50 colour.
+#' Prints a plot of clusters using a monochromatic low opacity gray (gray50) colour.
+#'
+#' Using this colour scheme enables you to clearly visualise the density of profiles within each cluster.
 #'
 #' @param Tc A matrix containing time course data.
 #' @param clustered A fclust object containing the clustering details

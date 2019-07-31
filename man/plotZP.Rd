@@ -12,7 +12,7 @@ plotZP(list_concTpSummary, significanceTh = 0.5)
 \item{significanceTh}{P-value cutoff. This value ranges between 0 and 1. Generally, the threshold of p<0.5 is considered significant. This threshold can be reduced to, for example 0.01, 0.05 or 0.001, for only plotting the highly significant z-scores. To plot all z-scores, the treshold can be set to 1.}
 }
 \value{
-Displays a plot and returns a matrix, with z-scores masked (NA) according to the signficance threshold specified.
+Displays a plot and returns a matrix, with z-scores masked (NA) according to the signficance (p-value) threshold specified.
 }
 \description{
 Plot a heatmap of z-scores, masking the z-scores at insignificant p-values. Rows in the heatmap correspond to clusters, and columns in the heatmap correspond to time intervals.

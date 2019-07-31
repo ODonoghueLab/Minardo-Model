@@ -43,7 +43,8 @@ calc50crossing <- function(clustered){
 	}
 
 	mat_fiftyPoints <- mat_fiftyPoints[-1,]
-	return(mat_fiftyPoints) 
+	colnames(mat_fiftyPoints) <- c("Cluster", "Time", "Abundance", "Dir") 
+	return(mat_fiftyPoints)
 }
 
 
@@ -77,7 +78,7 @@ plotZP_fifty <- function(list_concTpSummary, mat_fiftyPoints, significanceTh=0.5
 
 	matToPlot <- list_concTpSummary[[1]]
 
-	rwb <- grDevices::colorRampPalette(colors = c("blue", "white", "red"))(n=299)
+	rwb <- grDevices::colorRampPalette(colors = c("blue", "#cfcfcf", "red"))(n=299)
 
 
 	if (!all(theSignifs)){
@@ -88,7 +89,7 @@ plotZP_fifty <- function(list_concTpSummary, mat_fiftyPoints, significanceTh=0.5
 		idx_forGray50 <- theBreaks <= zscore_largest_noSignif & theBreaks >= -zscore_largest_noSignif
 
 
-		rwb[idx_forGray50] <- "gray50"
+		rwb[idx_forGray50] <- "#cfcfcf"
 
 		matToPlot[!theSignifs] <- NA
 	}
@@ -97,7 +98,7 @@ plotZP_fifty <- function(list_concTpSummary, mat_fiftyPoints, significanceTh=0.5
 	titleTxt = paste("Significant changes\n(z-values of intervals,\n with significance p \u003C", significanceTh, ")", sep="")
 	# print(titleTxt)
 
-	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="gray50", tracecol=NA, density.info="none", sepcolor="gray50", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45, add.expr=graphics::segments(x0=segs[[1]], y0=segs[[2]], x1=segs[[1]], y1=segs[[4]], col=segs[[5]], lwd=3))
+	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="#cfcfcf", tracecol=NA, density.info="none", sepcolor="#cfcfcf", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45, add.expr=graphics::segments(x0=segs[[1]], y0=segs[[2]], x1=segs[[1]], y1=segs[[4]], col=segs[[5]], lwd=3))
 
 	return (matToPlot)
 }

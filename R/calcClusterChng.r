@@ -137,7 +137,7 @@ printZP <- function(list_concTpSummary){
 #' @param list_concTpSummary Z-scores and p-values extracted from tukey-constrasts for glm's of each cluster. Obtained by running the "summaryGetZP" function.
 #' @param significanceTh P-value cutoff. This value ranges between 0 and 1. Generally, the threshold of p<0.5 is considered significant. This threshold can be reduced to, for example 0.01, 0.05 or 0.001, for only plotting the highly significant z-scores. To plot all z-scores, the treshold can be set to 1.
 #'
-#' @return Displays a plot and returns a matrix, with z-scores masked (NA) according to the signficance threshold specified.
+#' @return Displays a plot and returns a matrix, with z-scores masked (NA) according to the signficance (p-value) threshold specified.
 #'
 #'
 #' @seealso \code{\link{summaryGetZP}}
@@ -154,7 +154,7 @@ plotZP <- function(list_concTpSummary, significanceTh=0.5){
 
 	matToPlot <- list_concTpSummary[[1]]
 
-	rwb <- grDevices::colorRampPalette(colors = c("blue", "white", "red"))(n=299)
+	rwb <- grDevices::colorRampPalette(colors = c("blue", "#cfcfcf", "red"))(n=299)
 
 
 	if (!all(theSignifs)){
@@ -165,7 +165,7 @@ plotZP <- function(list_concTpSummary, significanceTh=0.5){
 		idx_forGray50 <- theBreaks <= zscore_largest_noSignif & theBreaks >= -zscore_largest_noSignif
 
 
-		rwb[idx_forGray50] <- "gray50"
+		rwb[idx_forGray50] <- "#cfcfcf"
 
 		matToPlot[!theSignifs] <- NA
 	}
@@ -174,7 +174,7 @@ plotZP <- function(list_concTpSummary, significanceTh=0.5){
 	titleTxt = paste("Significant changes\n(z-values of intervals,\n with significance p \u003C", significanceTh, ")", sep="")
 	# print(titleTxt)
 
-	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="gray50", tracecol=NA, density.info="none", sepcolor="gray50", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45)
+	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="#cfcfcf", tracecol=NA, density.info="none", sepcolor="#cfcfcf", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45)
 
 	return (matToPlot)
 }
