@@ -22,7 +22,7 @@
 #' @importFrom stats p.adjust wilcox.test t.test
 #' @importFrom nem transitive.reduction
 #' @importFrom igraph graph_from_adjacency_matrix adjacent_vertices V are.connected vertex_connectivity
-#' @importFrom graphics plot segments axis
+#' @importFrom graphics plot segments axis rect
 #'
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calc50crossing}} for identifying events.
 #'
@@ -92,21 +92,48 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	mat_grayLines <- getGrayLines(mat_eventPoints, signifs)
 	mat_clusConnLines <- getClusConnLines(mat_eventPoints)
 	vec_labels <- getYaxisLabels(mat_eventPoints)
+	mat_bgRects <- getRectPoints(list_eventsOrder, mat_eventPoints, signifs)
 
-
+	# print(mat_bgRects)
 	# plotting
+	# print("here ... ")
+	# print(list_eventsOrder)
+
+# orig	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=3, pch=19, col=mat_eventPoints[,cols_matFifty$col_dir], xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n")
 
 
+	# plot(0,type='n',axes=FALSE,ann=FALSE)
 
-	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=3, pch=19, col=mat_eventPoints[,cols_matFifty$col_dir], xlab="Time", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n")
-	graphics::axis(side=2, at=seq(1,length(vec_labels)), labels=rev(vec_labels))
+	# graphics::plot(0,0, xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n")
 
+
+	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=3, pch=19, col=colors_orderedEvents$incr, xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n")
+
+	# plot(v, type = "n",xlab="",xaxt="n")
+	# par("usr")
+	for (rowNum in 1:nrow(mat_bgRects)){
+		if (rowNum%%2 == 1){
+			graphics::rect(mat_bgRects[rowNum,1], 0.5, mat_bgRects[rowNum,2], max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus])) + 0.5, col = "#ededed", border=NA)
+		}
+
+	}
+
+	graphics::points(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=3, pch=19, col=colors_orderedEvents$incr, xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep="", cex=0.5), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n")
+
+	# par(new=TRUE)
+
+	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.2,  col = NA ) #, col.ticks = 1)
+
+	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.2,  col = NA ) #, col.ticks = 1)
+
+	# rect(-0.5, 0, 0.5, 17.5, col = "yellow", border="#ededed")
 
 	graphics::segments(x0=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_y1]), col=mat_clusConnLines[,cols_clusPlotObjs$col_col], lwd=3)
 
-	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col=mat_grayLines[,cols_clusPlotObjs$col_col], lty="dashed", lwd=0.5)
+	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col="#808080", lty="dotted", lwd=0.5)
 	# }
 
+	# dev.off()
 	return (mat_fiftyPts_withOrder)
 }
 
@@ -466,6 +493,43 @@ getGrayLines <- function(mat_eventPoints, signifs){
 
 	return (theGrayLines)
 }
+
+getRectPoints <- function(list_eventsOrder, mat_eventPoints, signifs){
+
+	rectPoints = matrix(ncol=2) # c(rect_start, rect_end, col) col alternate between white and background gray
+
+	# print("get rect points")
+	# print(list_eventsOrder)
+
+	rectRow = 1; rectStart = 1; rectEnd = 2; # rectCol;
+	rectPoints[rectRow, rectStart] = -0.5
+
+	for (i in 2:length(list_eventsOrder)){
+		isNonSignif = FALSE
+
+
+		if (isAnyNonSignifFromPrevAll(list_eventsOrder, i, signifs) == FALSE) {
+			# print(as.numeric(mat_eventPoints[list_eventsOrder[[i]][1], cols_matFifty$col_x]))
+			rectPoints[rectRow, rectEnd] = as.numeric(mat_eventPoints[list_eventsOrder[[i-1]][1], cols_matFifty$col_x]) + 0.5 # x of current event + 0.5;
+			rectRow = rectRow + 1
+			rectPoints <- rbind(rectPoints, c(0,0))
+			rectPoints[rectRow, rectStart]<- rectPoints[rectRow-1, rectEnd]
+		}
+	}
+	# rectPoints <- rectPoints[-1,]
+
+	rectPoints[rectRow, rectEnd] <- max(as.numeric(mat_eventPoints[, cols_matFifty$col_x])) + 0.5
+
+	if (rectPoints[rectRow, rectStart] == rectPoints[rectRow, rectEnd]){
+		rectPoints = rectPoints[-rectRow,]
+	}
+	print("Rect points")
+	print(rectPoints)
+
+	return (rectPoints)
+
+}
+
 
 getClusConnLines <- function(mat_eventPoints){
 	mat_clusConnLines = matrix(ncol=5,nrow=nrow(mat_eventPoints))
