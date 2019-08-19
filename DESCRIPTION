@@ -16,7 +16,8 @@ Imports:
 	grDevices,
 	methods,
 	igraph,
-	nem
+	nem,
+	shape
 Suggests:
 	Mfuzz
 RoxygenNote: 6.1.1

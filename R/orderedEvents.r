@@ -22,7 +22,7 @@
 #' @importFrom stats p.adjust wilcox.test t.test
 #' @importFrom nem transitive.reduction
 #' @importFrom igraph graph_from_adjacency_matrix adjacent_vertices V are.connected vertex_connectivity
-#' @importFrom graphics plot segments axis rect
+#' @importFrom graphics plot segments axis rect text lines
 #' @importFrom shape Arrows
 #'
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calc50crossing}} for identifying events.
@@ -87,8 +87,6 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	list_eventsOrder <- getEventsOrderInGraph(reducted, net) # computing the order of the events in the mat_fiftyPoints based on a bfs search.
 	list_eventsOrder <- adjustEvents(list_eventsOrder, signifs)
 
-	# print("list new events order")
-	# print(list_eventsOrder)
 
 	mat_fiftyPts_withOrder <- appendOrder(mat_fiftyPoints, list_eventsOrder)
 
@@ -102,7 +100,6 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	vec_labels <- getYaxisLabels(mat_eventPoints)
 	mat_bgRects <- getRectPoints(list_eventsOrder, mat_eventPoints, signifs)
 
-	print(mat_eventPoints)
 	mat_xLabelsClus <- getXaxisLabels(list_eventsOrder, mat_eventPoints, signifs);
 
 
@@ -112,13 +109,14 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n") # pch=19
 
 	# background gray rectangles.
-	for (rowNum in 1:nrow(mat_bgRects)){
-		if (rowNum%%2 == 1){
-			graphics::rect(mat_bgRects[rowNum,1], 0.5, mat_bgRects[rowNum,2], max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus])) + 0.5, col = "#ededed", border=NA)
+	if (nrow(mat_bgRects) > 0){
+		for (rowNum in 1:nrow(mat_bgRects)){
+			if (rowNum%%2 == 1){
+				graphics::rect(mat_bgRects[rowNum,1], 0.5, mat_bgRects[rowNum,2], max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus])) + 0.5, col = "#ededed", border=NA)
+			}
+
 		}
-
 	}
-
 
 	# axis labels on sides 2 and 4.
 	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.2,  col = NA ) #, col.ticks = 1)
@@ -138,45 +136,29 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 
 
-	# the event points on the graph.
-	# mat_eventPoints[,cols_matFifty$]
+	# the events (arrows) within a graph
 	mat_upEvents = mat_eventPoints[mat_fiftyPoints[,cols_matFifty$col_dir] == 1,]
 	mat_downEvents = mat_eventPoints[mat_fiftyPoints[,cols_matFifty$col_dir] == -1,]
-	# print("now for the event points")
-	# print(mat_eventPoints)
-	#graphics::points(mat_upEvents[,cols_matFifty$col_x], mat_upEvents[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=1, pch=24, col=color_events$up, bg=color_events$up, xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep="", cex=0.5), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(-1, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n")
-	#adjusted <- as.numeric(mat_upEvents[,cols_matFifty$col_y]) - 0.15
-	# print(adjusted)
-	#graphics::points(mat_upEvents[,cols_matFifty$col_x], adjusted, pch = 15, col=color_events$up, bg=color_events$up)
 
+
+	## arrow bottoms
 	shape::Arrows(x0=as.numeric(mat_upEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_upEvents[,cols_matFifty$col_x]), y0=as.numeric(mat_upEvents[,cols_matFifty$col_y])-0.01-0.2,  y1=as.numeric(mat_upEvents[,cols_matFifty$col_y])-0.01, arr.type="triangle", arr.length=0.01, arr.width=0.01, col=color_events$up, lwd=2, lend=2, arr.adj=0)
 
 	shape::Arrows(x0=as.numeric(mat_downEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_downEvents[,cols_matFifty$col_x]), y0=as.numeric(mat_downEvents[,cols_matFifty$col_y])+0.25,  y1=as.numeric(mat_downEvents[,cols_matFifty$col_y])+0.25-0.2, arr.type="triangle", arr.length=0.01, arr.width=0.01, col=color_events$down, lwd=2, lend=2, arr.adj=0)
 
 
-
+	## sharp arrow heads
 	shape::Arrows(x0=as.numeric(mat_upEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_upEvents[,cols_matFifty$col_x]), y0=as.numeric(mat_upEvents[,cols_matFifty$col_y])-0.01-0.2,  y1=as.numeric(mat_upEvents[,cols_matFifty$col_y])-0.01, arr.type="triangle", arr.length=0.13, arr.width=0.15, col=color_events$up, arr.adj=0, segment=FALSE)
 
 	shape::Arrows(x0=as.numeric(mat_downEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_downEvents[,cols_matFifty$col_x]), y0=as.numeric(mat_downEvents[,cols_matFifty$col_y])+0.25,  y1=as.numeric(mat_downEvents[,cols_matFifty$col_y])+0.25-0.2, arr.type="triangle", arr.length=0.13, arr.width=0.15, col=color_events$down, arr.adj=0, segment=FALSE)
 
 
-	# graphics::points(mat_downEvents[,cols_matFifty$col_x], mat_downEvents[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=1, pch=25, col=color_events$down, bg=color_events$down, xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep="", cex=0.5), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(-1, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n")
-	# adjusted <- as.numeric(mat_downEvents[,cols_matFifty$col_y]) + 0.15
-	# graphics::points(mat_downEvents[,cols_matFifty$col_x], adjusted, pch=15, col=color_events$down, bg=color_events$down)
-
 	# gray lines in events points maps
 	straightGrayLines = mat_grayLines_v2[mat_grayLines_v2[,cols_grayLines_v2$col_isSemiCirc] == FALSE,]
-	# print(straightGrayLines)
 	graphics::segments(x0=as.numeric(straightGrayLines[,cols_grayLines_v2$col_x0]), y0=rep(yPos_eventPts, length(straightGrayLines)), x1=as.numeric(straightGrayLines[,cols_grayLines_v2$col_x1]), y1=rep(yPos_eventPts, length(straightGrayLines)), lwd=1, col="#A2A2A2") #, lty="dotted")
 
 	# gray curves in events points map
 	mat_curvePoints = mat_grayLines_v2[mat_grayLines_v2[,cols_grayLines_v2$col_isSemiCirc] == TRUE,]
-	# print(mat_curvePoints)
-	# print(mat_curvePoints[1, cols_grayLines_v2$col_x0])
-	# print(mat_curvePoints[1, cols_grayLines_v2$col_x1])
-	print("the gray lines v2")
-	print(mat_curvePoints)
-	print(nrow(mat_curvePoints))
 
 	if (nrow(mat_curvePoints) > 0){
 		for (i in 1:nrow(mat_curvePoints)){
@@ -191,53 +173,29 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	# printing up and down events (in arc events map)
 	y_adjust = 0.15
 
-	# Arrows(1,3,4,6,lwd=2, arr.type="triangle")
-
+	## arrow bottom lines
 	shape::Arrows(x0=as.numeric(mat_upEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_upEvents[,cols_matFifty$col_x]), y0=rep(-1.2, nrow(mat_upEvents)), y1=rep(-1, nrow(mat_upEvents)), arr.type="triangle", arr.length=0.01, arr.width=0.01, col=color_events$up, lwd=2, lend=2, arr.adj=0)
 
 	shape::Arrows(x0=as.numeric(mat_downEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_downEvents[,cols_matFifty$col_x]), y0=rep(-0.8, nrow(mat_downEvents)), y1=rep(-1, nrow(mat_downEvents)), arr.type="triangle", arr.length=0.01, arr.width=0.01, col=color_events$down, lwd=2, lend=2, arr.adj=0)
 
-
+	## sharp arrow heads
 	shape::Arrows(x0=as.numeric(mat_upEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_upEvents[,cols_matFifty$col_x]), y0=rep(-1.2, nrow(mat_upEvents)), y1=rep(-1, nrow(mat_upEvents)), arr.type="triangle", arr.length=0.13, arr.width=0.15, col=color_events$up, arr.adj=0, segment=FALSE)
 
 	shape::Arrows(x0=as.numeric(mat_downEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_downEvents[,cols_matFifty$col_x]), y0=rep(-0.8, nrow(mat_downEvents)), y1=rep(-1, nrow(mat_downEvents)), arr.type="triangle", arr.length=0.13, arr.width=0.15, col=color_events$down, arr.adj=0, segment=FALSE)
-#
-#	shape::Arrows(x0=as.numeric(mat_upEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_upEvents[,cols_matFifty$col_x]), y0=as.numeric(mat_upEvents[,cols_matFifty$col_y])-0.05-0.2,  y1=as.numeric(mat_upEvents[,cols_matFifty$col_y])-0.05, arr.type="triangle", arr.length=0.13, arr.width=0.15, col=color_events$up, arr.adj=0, segment=TRUE)
 
-	# 	 rep(yPos_eventPts-0.08, nrow(mat_upEvents)), pch = 15, col=color_events$up, bg=color_events$up, cex=0.5)
-	# graphics::points(mat_upEvents[,cols_matFifty$col_x], rep(yPos_eventPts-0.08, nrow(mat_upEvents)), pch = 15, col=color_events$up, bg=color_events$up, cex=0.5)
-	# graphics::points(mat_downEvents[,cols_matFifty$col_x], rep(yPos_eventPts+y_adjust, nrow(mat_downEvents)), pch = 15, col=color_events$down, bg=color_events$down, cex=0.5)
-
-
-	# graphics::points(mat_upEvents[,cols_matFifty$col_x], rep(yPos_eventPts+y_adjust, nrow(mat_upEvents)), pch=24, col=color_events$up, bg=color_events$up)
-	# graphics::points(mat_downEvents[,cols_matFifty$col_x], rep(-1-0.06, nrow(mat_downEvents)), pch=25, col=color_events$down, bg=color_events$down)
-
-	# print(mat_xLabelsClus)
+	# x label text.
 	graphics::text(x=as.numeric(mat_xLabelsClus[,1]), y=as.numeric(mat_xLabelsClus[,2]), labels=mat_xLabelsClus[,3], offset=0, cex=0.5)
 
-
-	# colors_orderedEvents$incr, bg=colors_orderedEvents$incr)
-
-
-	# polygon(1:9, c(2,1,2,1,NA,2,1,2,1),
-    #    col = c("red", "blue"),
-    #    border = c("green", "yellow"),
-    #    lwd = 3, lty = c("dashed", "solid"))
-
-	# }
-
-	# dev.off()
 	return (mat_fiftyPts_withOrder)
 }
 
+
+
 calcCurves <- function(x0, x1, yCentPos){
-	print("curves part")
-	print(x0)
-	print(x1)
+
 	x_10pts <- seq(x0, x1, length.out=50)
 
 	y_10pts <- topSemiCircleEq(x_10pts, yCentPos)
-	# print(x_10pts)
 
 	list_pts <- list(x_10pts, y_10pts)
 	return (list_pts)
@@ -250,12 +208,12 @@ topSemiCircleEq <- function(xPts, yCentPos){
 
 	r = abs(xPts[1] - xPts[length(xPts)])/2
 	xCentPos = (xPts[1] + xPts[length(xPts)]) /2
-	# print(r^2)
+
 	for (xPt in xPts){
 		yPt = sqrt(abs(r^2 - (xPt-xCentPos)^2)) + yCentPos + 0.4
 		yPts = c(yPts, yPt)
 	}
-	# print(yPts)
+
 	return (yPts)
 }
 
@@ -699,14 +657,11 @@ convertToUniqueVec <- function(list_nodes){
 
 ###################### FOR PLOTTING
 getXaxisLabels <- function(list_eventsOrder, mat_eventPoints, signifs){
-	print (list_eventsOrder)
 	mat_xLabelsClus = matrix(ncol=3) #x0, y0, labelNames
 	x0 = -1; x0_incr = 1; y0_decr = 0.5
 	for (i in 1:length(list_eventsOrder)){
 
 		if (i > 1 && isAnyNonSignifFromPrevAll(list_eventsOrder, i, signifs) == TRUE){
-			 print("closer ")
-			 print(list_eventsOrder[[i]])
 			x0 = x0 + 0.25;
 		}
 		else {
@@ -724,7 +679,6 @@ getXaxisLabels <- function(list_eventsOrder, mat_eventPoints, signifs){
 
 	}
 
-	print(mat_xLabelsClus)
 	mat_xLabelsClus <- mat_xLabelsClus[-1,]
 	return (mat_xLabelsClus)
 }
@@ -740,9 +694,6 @@ getGrayLines_v2 <- function(list_eventsOrder, mat_eventPoints, signifs){
 
 					j_layer = getLayerNum(list_eventsOrder, j)
 					i_layer = getLayerNum(list_eventsOrder, i)
-
-					# print(paste(j_layer, i_layer, j, i))
-					# print(i_layer)
 
 					if (j_layer != i_layer){
 						if (i_layer - 1 == j_layer || j_layer - 1 == i_layer){
@@ -807,9 +758,6 @@ getGrayLines <- function(mat_eventPoints, signifs){
 getRectPoints <- function(list_eventsOrder, mat_eventPoints, signifs){
 
 	rectPoints = matrix(ncol=2) # c(rect_start, rect_end, col) col alternate between white and background gray
-
-	# print("get rect points")
-	# print(list_eventsOrder)
 
 	rectRow = 1; rectStart = 1; rectEnd = 2; # rectCol;
 	rectPoints[rectRow, rectStart] = -0.5
