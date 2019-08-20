@@ -7,7 +7,7 @@ cols_orderedEvents = c(cols_matFifty, col_order=5)
 
 
 colors_orderedEvents = list(incr = "#e6aeae", decr=rgb(0,0,0,alpha=0)) # incr color #F78A72
-
+#
 color_events = list(up="#ea3424", down="#ffe0e0")
 # colors_orderedEvents <- vector(mode="list", length=3)
 # names(colors_orderedEvents) <- c("incr", "decr")
@@ -21,3 +21,5 @@ color_events = list(up="#ea3424", down="#ffe0e0")
 
 
 ################## OTHER CONSTANTS
+
+cols_rectPoints = list(x0=1, x1=2)

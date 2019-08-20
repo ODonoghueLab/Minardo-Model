@@ -90,38 +90,75 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 	mat_fiftyPts_withOrder <- appendOrder(mat_fiftyPoints, list_eventsOrder)
 
+
+
 	## Getting other things ready for plotting
-	# if (FALSE){
-	mat_eventPoints <- getTheClusLines(mat_fiftyPoints, list_eventsOrder, signifs)
-	mat_grayLines <- getGrayLines(mat_eventPoints, signifs)
-	mat_grayLines_v2 <- getGrayLines_v2(list_eventsOrder, mat_eventPoints, signifs)
 
-	mat_clusConnLines <- getClusConnLines(mat_eventPoints)
-	vec_labels <- getYaxisLabels(mat_eventPoints)
-	mat_bgRects <- getRectPoints(list_eventsOrder, mat_eventPoints, signifs)
+	# plotting constants
+	sigEventsDiff_x = 0.5
+	nonSigEventsDiff_x = 0.25
 
-	mat_xLabelsClus <- getXaxisLabels(list_eventsOrder, mat_eventPoints, signifs);
+	eventPtGraph_y = -1
+	yLabelInit = -1.8
+	yLabelSpace = 0.5
 
+	lineDiff_y = 1
+
+	# graphXStart = -1
+	eventStart_x = 0
+
+	blockSpacingFmEvent_x = sigEventsDiff_x/2
+	blockStart_x = eventStart_x - blockSpacingFmEvent_x
+
+
+	#x_lineStart, y_lineStart, y_lineDecr, x_incr_sig, x_incr_nonSig
 
 	yPos_eventPts = -1
 
+	# plotting values
+	list_blocks <- getRectBlock(list_eventsOrder, signifs)
+	mat_eventPoints <- getTheClusLines(mat_fiftyPoints, list_eventsOrder, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, lineDiff_y)
+
+	eventEnd_x = max(as.numeric(mat_eventPoints[,cols_matFifty$col_x])) #  + blockSpacingFmEvent_x
+	blockEnd_x = eventEnd_x + blockSpacingFmEvent_x
+
+	mat_bgRects <- getRectPoints(mat_eventPoints, list_blocks, blockStart_x, blockSpacingFmEvent_x)
+
+
+	# mat_eventPoints <- adjustByBgRects(mat_bgRects, list_eventsOrder, mat_eventPoints)
+
+
+	mat_grayLines <- getGrayLines(mat_eventPoints, signifs)
+	mat_grayLines_v2 <- getGrayLines_v2(list_eventsOrder, mat_eventPoints, signifs)
+
+	# print("The max x is ")
+	# print(max(as.numeric(mat_eventPoints[,cols_matFifty$col_x])))
+	mat_clusConnLines <- getClusConnLines(mat_eventPoints, blockStart_x, blockEnd_x)
+	vec_labels <- getYaxisLabels(mat_eventPoints)
+
+
+	mat_xLabelsClus <- getXaxisLabels(list_eventsOrder, mat_eventPoints, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, yLabelInit, yLabelSpace);
+
+	# constants
+
+
 	# a set of points to set up the graph.
-	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(0, max(as.numeric(mat_eventPoints[,cols_matFifty$col_x]))), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n") # pch=19
+	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n") #,
 
 	# background gray rectangles.
 	if (nrow(mat_bgRects) > 0){
 		for (rowNum in 1:nrow(mat_bgRects)){
 			if (rowNum%%2 == 1){
-				graphics::rect(mat_bgRects[rowNum,1], 0.5, mat_bgRects[rowNum,2], max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus])) + 0.5, col = "#ededed", border=NA)
+				graphics::rect(mat_bgRects[rowNum,1], lineDiff_y/2, mat_bgRects[rowNum,2], max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus])) + (lineDiff_y/2), col = "#ededed", border=NA)
 			}
 
 		}
 	}
 
 	# axis labels on sides 2 and 4.
-	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.2,  col = NA ) #, col.ticks = 1)
+	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.1,  col = NA ) #, col.ticks = 1)
 
-	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.2,  col = NA ) #, col.ticks = 1)
+	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.1,  col = NA ) #, col.ticks = 1)
 
 
 	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col="#808080", lty="dotted", lwd=0.5)
@@ -188,6 +225,7 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 	return (mat_fiftyPts_withOrder)
 }
+
 
 
 
@@ -656,24 +694,44 @@ convertToUniqueVec <- function(list_nodes){
 
 
 ###################### FOR PLOTTING
-getXaxisLabels <- function(list_eventsOrder, mat_eventPoints, signifs){
+getXaxisLabels <- function(list_eventsOrder, mat_eventPoints, signifs, list_blocks, eventStart_x, xSigIncr, xNonSigIncr, yLabelInit, yLabelSpace){
 	mat_xLabelsClus = matrix(ncol=3) #x0, y0, labelNames
-	x0 = -1; x0_incr = 1; y0_decr = 0.5
+	x0 = eventStart_x;
+	eventsVisited = c()
+
+	isFirst = TRUE
+
 	for (i in 1:length(list_eventsOrder)){
 
-		if (i > 1 && isAnyNonSignifFromPrevAll(list_eventsOrder, i, signifs) == TRUE){
-			x0 = x0 + 0.25;
+		eventsVisited = c(eventsVisited, list_eventsOrder[[i]])
+
+		if (i > 1 && isAnyNonSignifFromPrevAll(list_eventsOrder, i, signifs) == TRUE || isInSameBlock(list_eventsOrder[[i]], eventsVisited, list_blocks)){
+			if (isFirst == FALSE){
+				x0 = x0 + xNonSigIncr;
+			}
+			else{
+				isFirst = FALSE
+			}
 		}
 		else {
-			x0 = x0 + x0_incr;
+			if (isFirst == FALSE){
+				x0 = x0 + xSigIncr;
+			}
+			else {
+				isFirst = FALSE
+			}
+
 		}
 
-		y0 = -1.8
-		for (event in sort(list_eventsOrder[[i]])){
+		y0 = yLabelInit
+
+		sortedEvents <- getSortedEventsByY(list_eventsOrder[[i]], mat_eventPoints)
+
+		for (event in sortedEvents){
 			rowVal = c(x0, y0, mat_eventPoints[event, cols_matFifty$col_clus])
 			mat_xLabelsClus <- rbind(mat_xLabelsClus, rowVal)
 
-			y0 = y0 - y0_decr;
+			y0 = y0 - yLabelSpace;
 		}
 
 
@@ -682,6 +740,12 @@ getXaxisLabels <- function(list_eventsOrder, mat_eventPoints, signifs){
 	mat_xLabelsClus <- mat_xLabelsClus[-1,]
 	return (mat_xLabelsClus)
 }
+
+getSortedEventsByY <- function(events, mat_eventPoints){
+	theOrder <- rev(order(as.numeric(mat_eventPoints[events, cols_matFifty$col_y])))
+	return(events[theOrder])
+}
+
 
 getGrayLines_v2 <- function(list_eventsOrder, mat_eventPoints, signifs){
 	theGrayLines = matrix(ncol=4) # x0, x1, isSemiCircle, color
@@ -755,41 +819,110 @@ getGrayLines <- function(mat_eventPoints, signifs){
 	return (theGrayLines)
 }
 
-getRectPoints <- function(list_eventsOrder, mat_eventPoints, signifs){
-
-	rectPoints = matrix(ncol=2) # c(rect_start, rect_end, col) col alternate between white and background gray
-
-	rectRow = 1; rectStart = 1; rectEnd = 2; # rectCol;
-	rectPoints[rectRow, rectStart] = -0.5
-
-	for (i in 2:length(list_eventsOrder)){
-		isNonSignif = FALSE
 
 
-		if (isAnyNonSignifFromPrevAll(list_eventsOrder, i, signifs) == FALSE) {
-			# print(as.numeric(mat_eventPoints[list_eventsOrder[[i]][1], cols_matFifty$col_x]))
-			rectPoints[rectRow, rectEnd] = as.numeric(mat_eventPoints[list_eventsOrder[[i-1]][1], cols_matFifty$col_x]) + 0.5 # x of current event + 0.5;
-			rectRow = rectRow + 1
-			rectPoints <- rbind(rectPoints, c(0,0))
-			rectPoints[rectRow, rectStart]<- rectPoints[rectRow-1, rectEnd]
+getRectPoints <- function(mat_eventPoints, list_blocks, rectStart, rectSpacingFmEvent){ #xStart, incr
+	mat_rectPts = matrix(ncol=2) # [x0, x1]
+
+	for (i in 1:length(list_blocks)){
+		xVal <- max(as.numeric(mat_eventPoints[list_blocks[[i]], cols_matFifty$col_x])) + rectSpacingFmEvent
+
+		if (i == 1){
+			x0 <- rectStart
 		}
+		else{
+			x0 <- mat_rectPts[nrow(mat_rectPts), cols_rectPoints$x1]
+		}
+
+		mat_rectPts <- rbind(mat_rectPts, c(x0, xVal))
+
 	}
-	# rectPoints <- rectPoints[-1,]
+	mat_rectPts <- mat_rectPts[-1, ]
+	return (mat_rectPts)
+}
 
-	rectPoints[rectRow, rectEnd] <- max(as.numeric(mat_eventPoints[, cols_matFifty$col_x])) + 0.5
 
-	if (rectPoints[rectRow, rectStart] == rectPoints[rectRow, rectEnd]){
-		rectPoints = rectPoints[-rectRow,]
-	}
-	# print("Rect points")
-	# print(rectPoints)
+getRectBlock <- function(list_eventsOrder, signifs){
+		list_blocks <- list()
 
-	return (rectPoints)
+		prevBlock <- c()
+		currBlock <- list_eventsOrder[[1]]
+
+
+		if(length(list_eventsOrder) > 1) {
+			for (i in 2:length(list_eventsOrder)){
+
+
+				isAny = isAnyNonSignifFromPrev(list_eventsOrder[[i]], currBlock, signifs)
+
+				if (isAny == TRUE){
+					currBlock <- c(currBlock, list_eventsOrder[[i]])
+
+				}
+				else{
+
+					prevBlock <- c(prevBlock, currBlock)
+					list_blocks[[length(list_blocks)+1]] <- currBlock
+					currBlock <- list_eventsOrder[[i]]
+					# rectPoints <- addToRectPoints(rectPoints, list_eventsOrder[[i]], mat_eventPoints)
+
+					 # can improve further - i.e. take max of prevBlock listEvents x value (done)
+				}
+
+				# if (i == length(list_eventsOrder)){
+			#		if (list_blocks[[length(list_blocks)]])
+			#	}
+
+				if (length(prevBlock) > 0 && length(currBlock) > 0 && isAnyNonSignifFromPrev(currBlock, prevBlock, signifs) == TRUE){
+
+					prevBlock <- prevBlock[!prevBlock == list_blocks[[length(list_blocks)]]]
+					# prevBlock <- prevBlock[!prevBlock == joiningEvents]
+					currBlock <- c(currBlock, list_blocks[[length(list_blocks)]])
+					list_blocks <- list_blocks[-length(list_blocks)]
+
+				}
+			}
+
+			# print(currBlock)
+			if (any(currBlock %in% list_blocks[[length(list_blocks)]]) == TRUE && all(currBlock %in% list_blocks[[length(list_blocks)]]) == FALSE ){
+				list_blocks[[length(list_blocks)]] <- currBlock
+			}
+			else if (all(currBlock %in% list_blocks[[length(list_blocks)]]) == FALSE){
+				list_blocks[[length(list_blocks)+1]] <- currBlock
+			}
+
+		}
+		# print("list blocks in getRectBlock")
+		# print(list_blocks)
+
+		# print(rectPoints)
+		return (list_blocks)
 
 }
 
 
-getClusConnLines <- function(mat_eventPoints){
+addToRectPoints <- function(rectPoints, events, mat_eventPoints){
+	print(max(as.numeric(mat_eventPoints[events, cols_matFifty$col_x])))
+	maxX <- max(as.numeric(mat_eventPoints[events, cols_matFifty$col_x]))
+
+	rowVal = c()
+	if (nrow(rectPoints) <= 1){
+		rowVal <- c(-1, maxX-0.5)
+
+	}
+	else{
+		rowVal <- c(rectPoints[nrow(rectPoints), 2], maxX-0.5)
+	}
+	# print("here")
+	# print(rowVal)
+
+	rectPoints <- rbind(rectPoints, rowVal)
+	return (rectPoints)
+}
+
+
+
+getClusConnLines <- function(mat_eventPoints, xStart, xEnd){
 	mat_clusConnLines = matrix(ncol=5,nrow=nrow(mat_eventPoints))
 	mat_basalConnLines = matrix(ncol=5,nrow=max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))) # only need 1 for each cluster
 
@@ -808,7 +941,7 @@ getClusConnLines <- function(mat_eventPoints){
 
 
 		# adding end x
-		mat_clusConnLines[i, cols_clusPlotObjs$col_x1] <- getTheEndX(mat_eventPoints, i, nrow(mat_eventPoints))
+		mat_clusConnLines[i, cols_clusPlotObjs$col_x1] <- getTheEndX(mat_eventPoints, i, xEnd)
 
 
 		# adding color
@@ -818,7 +951,7 @@ getClusConnLines <- function(mat_eventPoints){
 		## handling the adding of the basal
 		if (prevClus == -1 ){
 			# just store everything
-			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x0] = -1;
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x0] = xStart;
 			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x1] = mat_clusConnLines[i, cols_clusPlotObjs$col_x0];
 			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_y0] = mat_clusConnLines[i, cols_clusPlotObjs$col_y0];
 			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_y1] = mat_clusConnLines[i, cols_clusPlotObjs$col_y1];
@@ -840,7 +973,7 @@ getClusConnLines <- function(mat_eventPoints){
 			prevClus = mat_eventPoints[i,cols_matFifty$col_clus]
 			basalCounter = basalCounter + 1
 			# store everything again
-			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x0] = -1;
+			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x0] = xStart;
 			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_x1] = mat_clusConnLines[i, cols_clusPlotObjs$col_x0];
 			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_y0] = mat_clusConnLines[i, cols_clusPlotObjs$col_y0];
 			mat_basalConnLines[basalCounter, cols_clusPlotObjs$col_y1] = mat_clusConnLines[i, cols_clusPlotObjs$col_y1];
@@ -928,13 +1061,15 @@ isAnyNonSignifFromPrevAll <- function(list_eventsOrder, currLayerNum, signifs){
 
 
 
-getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs){
+getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs, list_blocks, xStart, xIncrSig, xIncrNonSig, yDecr){ #xStart, yStart, y_decr, x_incr_sig, x_incr_nonSig
 
 
 	mat_eventPoints <- matrix(nrow=nrow(mat_fiftyPoints), ncol=4)
 
-	x <- 0
+	x <- xStart
 	y <- max(mat_fiftyPoints[,1])
+
+	eventsVisited = c()
 
 	for (i in 1:length(list_eventsOrder)){
 		for (j in 1:length(list_eventsOrder[[i]])){
@@ -944,7 +1079,7 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs){
 			prevY <- getYIfClusPres(mat_fiftyPoints[eventNum, cols_matFifty$col_clus], mat_eventPoints)
 			if (prevY == -1){
 				mat_eventPoints[eventNum, cols_matFifty$col_y] <- y
-				y <- y - 1
+				y <- y - yDecr
 			}
 			else{
 				mat_eventPoints[eventNum, cols_matFifty$col_y] <- prevY
@@ -960,6 +1095,8 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs){
 
 			# assigning cluster number
 			mat_eventPoints[eventNum, cols_matFifty$col_clus] <- mat_fiftyPoints[eventNum, cols_matFifty$col_clus]
+
+			eventsVisited <- c(eventsVisited, eventNum)
 		}
 
 		# adding x coordinate
@@ -969,11 +1106,11 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs){
 		}
 		else{
 			# if (isAnyNonSignifFromPrev(list_eventsOrder[[i]], list_eventsOrder[[i-1]], signifs) == TRUE){ # place events closer together
-			if (isAnyNonSignifFromPrevAll(list_eventsOrder, i, signifs) == TRUE){
-				x <- x + 0.25
+			if (isAnyNonSignifFromPrevAll(list_eventsOrder, i, signifs) == TRUE || isInSameBlock(list_eventsOrder[[i]], eventsVisited, list_blocks)){
+				x <- x + xIncrNonSig
 			}
 			else {
-				x <- x + 1
+				x <- x + xIncrSig
 			}
 
 			mat_eventPoints <- addXForAll(list_eventsOrder[[i]], mat_eventPoints, x)
@@ -983,6 +1120,43 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs){
 	return (mat_eventPoints)
 
 }
+
+isInSameBlock <- function(events, eventsVisited, list_blocks){
+
+	# 1. find block.
+	# 2. exclude events from block, and from eventsVisited.
+	# 3. See if others in block, which are also visited.
+	# if so, return true, else return false.
+
+
+
+	blockNum <- findBlock(events[1], list_blocks)
+
+
+	eventsInBlock <-  as.vector(list_blocks[[blockNum]])
+	otherEventsInBlock <- setdiff(eventsInBlock, events)
+
+	otherEventsVisited <- setdiff(eventsVisited, events)
+
+	if (length(otherEventsInBlock) > 0 && length(otherEventsVisited) > 0 && (any(otherEventsVisited %in% otherEventsInBlock) || any(otherEventsInBlock %in% otherEventsVisited))) {
+		return (TRUE)
+	}
+
+	return (FALSE)
+}
+
+findBlock <- function(event, list_blocks){
+	i = -1
+	for (i in 1:length(list_blocks)){
+		if (event %in% list_blocks[[i]]){
+			return (i)
+		}
+	}
+
+	return (i)
+}
+
+
 
 isAnyNonSignifFromPrev <- function(vec_curr, vec_prev, signifs){
 
