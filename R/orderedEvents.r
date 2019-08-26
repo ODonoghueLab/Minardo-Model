@@ -143,7 +143,7 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 
 	# a set of points to set up the graph.
-	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n") #,
+	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n", cex.main = 0.8) #,
 
 	# background gray rectangles.
 	if (nrow(mat_bgRects) > 0){
@@ -156,9 +156,9 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	}
 
 	# axis labels on sides 2 and 4.
-	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.1,  col = NA ) #, col.ticks = 1)
+	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.05,  col = NA ) #, col.ticks = 1)
 
-	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.1,  col = NA ) #, col.ticks = 1)
+	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.05,  col = NA ) #, col.ticks = 1)
 
 
 	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col="#808080", lty="dotted", lwd=0.5)
