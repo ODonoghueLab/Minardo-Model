@@ -43,7 +43,7 @@ calc50crossing <- function(clustered){
 	}
 
 	mat_fiftyPoints <- mat_fiftyPoints[-1,]
-	colnames(mat_fiftyPoints) <- c("Cluster", "Time", "Abundance", "Dir") 
+	colnames(mat_fiftyPoints) <- c("Cluster", "Time", "Abundance", "Dir")
 	return(mat_fiftyPoints)
 }
 
@@ -63,7 +63,7 @@ calc50crossing <- function(clustered){
 #' @importFrom gplots heatmap.2
 #' @importFrom grDevices colorRampPalette
 #' @importFrom graphics segments
-#'
+#' @importFrom shape Arrows
 #'
 #' @seealso \code{\link{plotZP}}, \code{\link{summaryGetZP}}, \code{\link{calc50crossing}}
 #'
@@ -98,7 +98,14 @@ plotZP_fifty <- function(list_concTpSummary, mat_fiftyPoints, significanceTh=0.5
 	titleTxt = paste("Significant changes\n(z-values of intervals,\n with significance p \u003C", significanceTh, ")", sep="")
 	# print(titleTxt)
 
-	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="#cfcfcf", tracecol=NA, density.info="none", sepcolor="#cfcfcf", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45, add.expr=graphics::segments(x0=segs[[1]], y0=segs[[2]], x1=segs[[1]], y1=segs[[4]], col=segs[[5]], lwd=3))
+	idx_up = segs[[5]] == "#8B0000"
+	assign("idx_up", idx_up, envir=.GlobalEnv)
+	idx_down = segs[[5]] == "#00008B"
+	assign("idx_down", idx_down, envir=.GlobalEnv)
+
+
+	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="#cfcfcf", tracecol=NA, density.info="none", sepcolor="#cfcfcf", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45, add.expr=c(shape::Arrows(x0=segs[[1]][idx_up], x1=segs[[1]][idx_up], y0=segs[[2]][idx_up]-0.1,  y1=segs[[2]][idx_up]+0.5, arr.type="triangle", arr.length=0.2, arr.width=0.2, col="#8B0000", arr.adj=0, segment=FALSE), shape::Arrows(x0=segs[[1]][idx_down], x1=segs[[1]][idx_down], y0=segs[[2]][idx_down]+2,  y1=segs[[2]][idx_down]+0.5, arr.type="triangle", arr.length=0.2, arr.width=0.2, col="#00008B", arr.adj=0, segment=FALSE), graphics::segments(x0=segs[[1]], y0=segs[[2]]+0.3, x1=segs[[1]], y1=segs[[4]]-0.3, col=segs[[5]], lwd=3, lend=2)))
+
 
 	return (matToPlot)
 }

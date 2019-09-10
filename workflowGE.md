@@ -35,7 +35,7 @@ clustered <- cmeans(ge.stand, centers=20,  iter.max=200, m=1.25) # paper, 2014_m
 plotClusters(ge.stand, clustered)
 ```
 
-![Mfuzz clustering](images/Ge/ge_mfuzz.png)
+![Mfuzz clustering](images/Ge/ge_clusters.png)
 Fig. 1: Clusters of gene expression dataset.  
 
 

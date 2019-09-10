@@ -162,7 +162,7 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 
 	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col="#808080", lty="dotted", lwd=0.5)
-
+	# C99999
 
 
 
@@ -172,10 +172,12 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	graphics::segments(x0=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_clusConnLines[,cols_clusPlotObjs$col_y1]), col=mat_clusConnLines[,cols_clusPlotObjs$col_col], lwd=16, lend=2)
 
 
-
 	# the events (arrows) within a graph
 	mat_upEvents = mat_eventPoints[mat_fiftyPoints[,cols_matFifty$col_dir] == 1,]
 	mat_downEvents = mat_eventPoints[mat_fiftyPoints[,cols_matFifty$col_dir] == -1,]
+
+
+	# print(mat_upEvents)
 
 
 	## arrow bottoms
@@ -220,8 +222,14 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 	shape::Arrows(x0=as.numeric(mat_downEvents[,cols_matFifty$col_x]), x1=as.numeric(mat_downEvents[,cols_matFifty$col_x]), y0=rep(-0.8, nrow(mat_downEvents)), y1=rep(-1, nrow(mat_downEvents)), arr.type="triangle", arr.length=0.13, arr.width=0.15, col=color_events$down, arr.adj=0, segment=FALSE)
 
+
+	# vec_clusEvent = mat_eventPoints[,4]
+	# print(vec_clusEvent)
+	# vec_clusEvent[mat_eventPoints[mat_fiftyPoints[,cols_matFifty$col_dir] == 1]] = color_events$up
+	# vec_clusEvent[mat_eventPoints[mat_fiftyPoints[,cols_matFifty$col_dir] == -1] = color_events$down
+
 	# x label text.
-	graphics::text(x=as.numeric(mat_xLabelsClus[,1]), y=as.numeric(mat_xLabelsClus[,2]), labels=mat_xLabelsClus[,3], offset=0, cex=0.5)
+	graphics::text(x=as.numeric(mat_xLabelsClus[,1]), y=as.numeric(mat_xLabelsClus[,2]), labels=mat_xLabelsClus[,3], offset=0, cex=0.5, col=mat_xLabelsClus[,4])
 
 	return (mat_fiftyPts_withOrder)
 }
@@ -695,7 +703,7 @@ convertToUniqueVec <- function(list_nodes){
 
 ###################### FOR PLOTTING
 getXaxisLabels <- function(list_eventsOrder, mat_eventPoints, signifs, list_blocks, eventStart_x, xSigIncr, xNonSigIncr, yLabelInit, yLabelSpace){
-	mat_xLabelsClus = matrix(ncol=3) #x0, y0, labelNames
+	mat_xLabelsClus = matrix(ncol=4) #x0, y0, labelNames, color
 	x0 = eventStart_x;
 	eventsVisited = c()
 
@@ -728,7 +736,12 @@ getXaxisLabels <- function(list_eventsOrder, mat_eventPoints, signifs, list_bloc
 		sortedEvents <- getSortedEventsByY(list_eventsOrder[[i]], mat_eventPoints)
 
 		for (event in sortedEvents){
-			rowVal = c(x0, y0, mat_eventPoints[event, cols_matFifty$col_clus])
+			col = color_events$up
+
+			if (mat_eventPoints[event, cols_matFifty$col_dir] != colors_orderedEvents$incr){
+				col = color_events$down
+			}
+			rowVal = c(x0, y0, mat_eventPoints[event, cols_matFifty$col_clus], col)
 			mat_xLabelsClus <- rbind(mat_xLabelsClus, rowVal)
 
 			y0 = y0 - yLabelSpace;
