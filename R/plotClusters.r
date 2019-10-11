@@ -30,9 +30,9 @@ plotClusters <- function (Tc, clustered, plotNumCol=5){
     profMemberships <- as.matrix(allProfMemberships[clustered$cluster == clusNum,])
 
     # profMemberships.sorted <- sort(profMemberships, index=TRUE)
-
-    graphics::plot(NA, xlim=c(1,ncol(Tc)), ylim=c(min(Tc)-0.2, max(Tc)+0.2), xlab="Timepoints", ylab="Standardised profiles",  main = paste("Cluster ", toString(clusNum), "; size=", nrow(profilesInClus), sep=""))
-    graphics::axis(1, at=c(1:ncol(Tc)))
+	print(colnames(Tc))
+    graphics::plot(NA, xlim=c(1,ncol(Tc)), xaxt="n", ylim=c(min(Tc)-0.2, max(Tc)+0.2), xlab="Timepoints", ylab="Standardised profiles",  main = paste("Cluster ", toString(clusNum), "; size=", nrow(profilesInClus), sep=""))
+	graphics::axis(side=1, at=c(1:ncol(Tc)), labels=colnames(Tc))
 
     for (j in 1:nrow(profilesInClus)){
         # idx = profMemberships.sorted$ix[j]
@@ -81,8 +81,8 @@ plotClusters_fifty <- function (Tc, clustered, mat_fiftyPoints, plotNumCol=5){
     profMemberships <- as.matrix(allProfMemberships[clustered$cluster == clusNum,])
 
 
-    graphics::plot(NA, xlim=c(1,ncol(Tc)), ylim=c(min(Tc)-0.2, max(Tc)+0.2), xlab="Timepoints", ylab="Standardised profiles",  main = paste("Cluster ", toString(clusNum), "; size=", nrow(profilesInClus), sep=""))
-    graphics::axis(1, at=c(1:ncol(Tc)))
+    graphics::plot(NA, xlim=c(1,ncol(Tc)), xaxt="n", ylim=c(min(Tc)-0.2, max(Tc)+0.2), xlab="Timepoints", ylab="Standardised profiles",  main = paste("Cluster ", toString(clusNum), "; size=", nrow(profilesInClus), sep=""))
+    graphics::axis(side=1, at=c(1:ncol(Tc)), labels=colnames(Tc))
 
     for (j in 1:nrow(profilesInClus)){
 

@@ -52,7 +52,7 @@ calcClusterChng <- function(Tc, clustered){
 #' Summarize results obtained by running the "calcClusterChng" function. Specifically this function extracts z-scores and p-values.
 #'
 #' @param list_resSummaries A list returned by the "calcClusterChng" function.
-#' @param totalTimePoints Total number of time-points in the experiment.
+#' @param Tc The time course data
 #'
 #' @return A list containing two items, where the first item is a z-score matrix, and the second item is a p-value matrix.
 #'
@@ -61,23 +61,24 @@ calcClusterChng <- function(Tc, clustered){
 #' @seealso \code{\link{calcClusterChng}}
 #'
 #' @export
-summaryGetZP <- function(list_resSummaries, totalTimePoints){
+summaryGetZP <- function(list_resSummaries, Tc){
 
-	stopifnot(is(list_resSummaries,"clusterChange"), totalTimePoints > 1)
+	stopifnot(is(list_resSummaries,"clusterChange"), is(Tc, "matrix"))
 
 
 	list_concTpSummary <- list()
 	colNames = c()
 
-	zScores <- matrix(nrow=length(list_resSummaries), ncol=totalTimePoints-1)
-	pValues <- matrix(nrow=length(list_resSummaries), ncol=totalTimePoints-1)
+	zScores <- matrix(nrow=length(list_resSummaries), ncol=ncol(Tc)-1)
+	pValues <- matrix(nrow=length(list_resSummaries), ncol=ncol(Tc)-1)
 
 
 
 	for(clustNum in 1:length(list_resSummaries)){
-		for(tp in 2:totalTimePoints){
+		for(tp in 2:ncol(Tc)){
 
-			name = paste(tp, "-", (tp-1))
+			selName = paste(tp, "-", (tp-1))
+			name = paste(colnames(Tc)[tp], "-", colnames(Tc)[(tp-1)])
 
 			# print(name)
 			if(clustNum == 1){
@@ -85,9 +86,9 @@ summaryGetZP <- function(list_resSummaries, totalTimePoints){
 			}
 
 
-			zScores[clustNum, tp-1] <- list_resSummaries[[clustNum]]$test$tstat[name]
+			zScores[clustNum, tp-1] <- list_resSummaries[[clustNum]]$test$tstat[selName]
 
-			idx = which(names(list_resSummaries[[clustNum]]$test$tstat) == name)
+			idx = which(names(list_resSummaries[[clustNum]]$test$tstat) == selName)
 
 			pValues[clustNum, tp-1] <- list_resSummaries[[clustNum]]$test$pvalues[[idx]]
 
@@ -174,7 +175,7 @@ plotZP <- function(list_concTpSummary, significanceTh=0.5){
 	titleTxt = paste("Significant changes\n(z-values of intervals,\n with significance p \u003C", significanceTh, ")", sep="")
 	# print(titleTxt)
 
-	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="#cfcfcf", tracecol=NA, density.info="none", sepcolor="#cfcfcf", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45)
+	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="#cfcfcf", tracecol=NA, density.info="none", sepcolor="#cfcfcf", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45, cexCol=0.8)
 
 	return (matToPlot)
 }
