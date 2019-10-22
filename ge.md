@@ -1,4 +1,4 @@
-# Demonstration on Gene Expression dataset
+# Demonstration on a gene expression dataset
 
 In this document, we demonstrate how our package can be utilised to order gene expression clusters.
 
