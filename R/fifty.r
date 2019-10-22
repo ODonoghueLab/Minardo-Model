@@ -42,7 +42,7 @@ calc50crossing <- function(clustered){
 		}
 	}
 
-	mat_fiftyPoints <- mat_fiftyPoints[-1,]
+	mat_fiftyPoints <- mat_fiftyPoints[-1,,drop=FALSE]
 	colnames(mat_fiftyPoints) <- c("Cluster", "Time", "Abundance", "Dir")
 	return(mat_fiftyPoints)
 }

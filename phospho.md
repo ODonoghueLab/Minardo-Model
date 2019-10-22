@@ -47,7 +47,7 @@ resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 
 ```R
 timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, 0.05)
-mat_fiftyPoints <- calc50Crossing_v2(timeRegions, clustered, ) # for centroid and plots
+mat_fiftyPoints <- calc50Crossing_v2(timeRegions, clustered) # for centroid and plots
 plotClusters_fifty_v2
 plotZP_fifty_v2
 ```

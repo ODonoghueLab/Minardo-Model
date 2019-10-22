@@ -1,5 +1,61 @@
+#### MAIN FUNCTION 2.
 calc50crossing_v2 <- function(timeRegions, clustered, phosTh=0.5, dephosTh=0.5){
 
+	stopifnot(is(phosTh>0 && phosTh<=1), is(dephosTh>0 && dephosTh<=1))
+	mat_fiftyPoints <- matrix(ncol=6) # cluster, time, abundance, dir, startTp, endTp
+
+	for (clusNum in 1:nrow(clustered$center)){
+		for (i in 1:nrow(timeRegions[[clusNum]])){
+			startTp = as.integer(min(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
+			endTp = as.integer(max(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
+
+
+			#print("Value here..?")
+			print(paste(startTp, endTp))
+			print(clustered$center[clusNum, startTp:endTp])
+			crossPt <- calcCrossing(clustered$center[clusNum, startTp:endTp], timeRegions[[clusNum]][i, cols_timeReg$dir], (startTp -1))
+			# print(crossPt[1])
+			mat_fiftyPoints <- addToMatrixWithRegionInfo(mat_fiftyPoints, clusNum, crossPt[1], crossPt[2], timeRegions[[clusNum]][i, cols_timeReg$dir], startTp, endTp)
+		}
+	}
+
+	mat_fiftyPoints <- mat_fiftyPoints[-1,,drop=FALSE]
+	return (mat_fiftyPoints)
+}
+
+addToMatrixWithRegionInfo <- function(theMat, clusNum, x_50, y_50, direction, tpStart, tpEnd){
+	theMat <- rbind(theMat, c(clusNum, x_50, y_50, direction, tpStart, tpEnd))
+	return (theMat)
+}
+
+
+
+calcCrossing <- function(region, dir, offset){
+	y_max <- max(region)
+	y_min <- min(region)
+
+	y_50 <- (y_max + y_min)/2
+
+	x_50 <- -1 # initial time
+	# print(c(y_max, y_50, y_min))
+
+	# find intervals and store
+	for (j in 2:length(region)){
+		if (dir == 1 && y_50 >= region[j-1] && y_50 <= region[j]){
+			# 50 is crossed here in phos direction
+			x_50 <- getMidX((offset+j-1), region[j-1], offset+j, region[j], y_50)
+			# mat_fiftyPoints <- addToMatrix(mat_fiftyPoints, clusNum, x_50, y_50, 1)
+			# print(mat_fiftyPoints)
+		}
+		else if (dir == -1 && y_50 <= region[j-1] && y_50 >=region[j]) {
+			# 50 is crossed here in dephos direction
+			# getMidX()
+			x_50 <- getMidX((offset+j-1), region[j-1], offset+j, region[j], y_50)
+			# mat_fiftyPoints <- addToMatrix(mat_fiftyPoints, clusNum, x_50, y_50, -1)
+		}
+	}
+
+	return (c(x_50, y_50))
 }
 
 
