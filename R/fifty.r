@@ -72,7 +72,7 @@ calc50crossing <- function(clustered){
 #' @export
 plotZP_fifty <- function(list_concTpSummary, mat_fiftyPoints, significanceTh=0.5){
 
-	stopifnot(is(list_concTpSummary, "summary.clusterChange"), (significanceTh >0 && significanceTh <= 1), is(mat_fiftyPoints, "matrix"))
+	stopifnot( (significanceTh >0 && significanceTh <= 1), is(mat_fiftyPoints, "matrix"))
 
 	segs <- calcSegsOfCentroids(mat_fiftyPoints) # need to add to global, for graphics::segments to find.
 	assign("segs", segs, envir=.GlobalEnv)

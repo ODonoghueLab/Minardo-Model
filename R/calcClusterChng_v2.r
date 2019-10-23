@@ -34,15 +34,19 @@ calcClusterChng <- function(Tc, clustered){
 	list_dfsGlm <- convertMatToDfForGlmFormat(list_matrices)
 	# return (list_dfsGlm)
 
-	list_lm <- runGlmForEachCluster(list_dfsGlm)
-	print("Note: finished creating glm's")
 
-	# return (list_lm)
-	list_resSummaries <- runPostHocTukeyForEachClus(list_lm)
-	print("Note: finished post-hoc tukey")
+	# list_lm <- runGlmForEachCluster(list_dfsGlm)
+	# print("Note: finished creating glm's")
 
-	class(list_resSummaries) <- "clusterChange"
+	# list_resSummaries <- runPostHocTukeyForEachClus(list_lm)
+	# print("Note: finished post-hoc tukey")
+
+	list_resSummaries <- createGlmTukeyForEachClus(list_dfsGlm)
 	return (list_resSummaries)
+
+
+	# class(list_resSummaries) <- "clusterChange"
+	# return (list_resSummaries)
 }
 
 
@@ -64,7 +68,7 @@ calcClusterChng <- function(Tc, clustered){
 #' @export
 summaryGetZP <- function(list_resSummaries, Tc){
 
-	stopifnot(is(list_resSummaries,"clusterChange"), is(Tc, "matrix"))
+	# stopifnot(is(list_resSummaries,"clusterChange"), is(Tc, "matrix"))
 
 
 	list_concTpSummary <- list()
@@ -78,25 +82,24 @@ summaryGetZP <- function(list_resSummaries, Tc){
 	for(clustNum in 1:length(list_resSummaries)){
 		for(tp in 2:ncol(Tc)){
 
-			selName = paste(tp, "-", (tp-1))
-			name = paste(colnames(Tc)[tp], "-", colnames(Tc)[(tp-1)])
+			selName = paste((tp-1), "-", tp)
+			name = paste(colnames(Tc)[tp-1], "-", colnames(Tc)[tp])
 
-			# print(name)
+			print(selName)
 			if(clustNum == 1){
 				colNames <- c(colNames, name)
 			}
 
+			idx = which(glmTukeyForEachClus[[clustNum]]$contrasts[1] == selName )
 
-			zScores[clustNum, tp-1] <- list_resSummaries[[clustNum]]$test$tstat[selName]
+			zScores[clustNum, tp-1] <- as.numeric(list_resSummaries[[clustNum]]$contrasts[idx,]$z.ratio) * -1
 
-			idx = which(names(list_resSummaries[[clustNum]]$test$tstat) == selName)
-
-			pValues[clustNum, tp-1] <- list_resSummaries[[clustNum]]$test$pvalues[[idx]]
+			pValues[clustNum, tp-1] <- list_resSummaries[[clustNum]]$contrasts[idx,]$p.value
 
 		}
 	}
 
-
+	print(colNames)
 	colnames(zScores) <- colNames
 	colnames(pValues) <- colNames
 
@@ -192,7 +195,9 @@ runPostHocTukeyForEachClus <- function(list_lms){
 	list_tukeys <- list()
 
 	for (clustNum in 1:length(list_lms)){
-		list_tukeys[[clustNum]] <- summary(multcomp::glht(list_lms[[clustNum]], multcomp::mcp(fac_timepoint="Tukey")))
+		list_tukeys[[clustNum]] <- emmeans(list_lms[[clustNum]], pairwise ~ fac_timepoint, adjust="tukey")
+
+		 #  summary(multcomp::glht(list_lms[[clustNum]], multcomp::mcp(fac_timepoint="Tukey")))
 	}
 
 	return (list_tukeys)
@@ -216,6 +221,19 @@ runGlmForEachCluster <- function(list_dfsGlm){
 }
 
 
+createGlmTukeyForEachClus <- function(list_dfsGlm){
+	list_lm <- list()
+	list_tukeys <- list()
+
+	for (clusNum in 1:length(list_dfsGlm)){
+		aGlm <- stats::glm(formula=experimentalObs ~ fac_profileNum + fac_timepoint, data=list_dfsGlm[[clusNum]]) # setting up the glm
+		list_tukeys[[clusNum]] <- summary(emmeans(aGlm, pairwise ~ fac_timepoint, adjust="scheffe")) # running glm, and computing pairwise contrasts
+
+		# list_lm[[dfNum]] <- aGlm
+	}
+
+	return (list_tukeys)
+}
 #' Convert a list of matrices of each cluster, to a list of data frames (in the required glm format) for each cluster. Timepoint, and profileNum are factors, and experimentalObs (ratio) is y.
 #'
 #' @param list_matrices A list of matrices for each cluster

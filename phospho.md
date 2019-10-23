@@ -46,15 +46,18 @@ resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 #### 4. Determine events based on 3. (i.e. use z-scores to set threshold for calculating events.)
 
 ```R
-timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, 0.05)
-mat_fiftyPoints <- calc50Crossing_v2(timeRegions, clustered) # for centroid and plots
-plotClusters_fifty_v2
-plotZP_fifty_v2
+timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, 0.001)
+mat_fiftyPoints <- calc50crossing_v3(timeRegions, clustered) # for centroid and plots
+
+plotClusters_fifty_v2(humphrey.stand, clustered, mat_fiftyPoints)
+plotZP_fifty_v2(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.001)
 ```
 
 #### 5. Order filtered(/unfiltered events).
 Order events (using mean or median) & plot.
+```R
 
+orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints)
 
 #### 6. Publication ready:
 	Do steps 1-5 in the background (and then generate figures rearranged, for output).
