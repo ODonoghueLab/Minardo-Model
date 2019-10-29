@@ -34,6 +34,10 @@ addToMatrixWithRegionInfo <- function(theMat, clusNum, x_50, y_50, direction, tp
 
 
 calcCrossing_v3 <- function(region, dir, offset, phosTh, dephosTh){
+
+	x_50 <- -1 # initial time
+	y_50 <- -1
+
 	y_max <- max(region)
 	y_min <- min(region)
 
@@ -46,11 +50,11 @@ calcCrossing_v3 <- function(region, dir, offset, phosTh, dephosTh){
 		y_50 <- y_min + y_10Percent
 	}
 
-	print(paste("Value here is: ", y_max, y_min, y_50))
+	# print(paste("Value here is: ", y_max, y_min, y_50))
 
 	# y_50 <- (y_max + y_min)/2
 
-	x_50 <- -1 # initial time
+
 	# print(c(y_max, y_50, y_min))
 
 	# find intervals and store
@@ -68,7 +72,7 @@ calcCrossing_v3 <- function(region, dir, offset, phosTh, dephosTh){
 			# mat_fiftyPoints <- addToMatrix(mat_fiftyPoints, clusNum, x_50, y_50, -1)
 		}
 	}
-
+	# print(paste(y_50, x_50, sep=" ... "))
 	return (c(x_50, y_50))
 }
 
@@ -332,9 +336,10 @@ convertToMatAndAddNAs <- function(glmTukeyForAClus, numTps, signifTh){
 		if ((val1+1) <= numTps){
 			for (val2 in seq((val1+1), (numTps))){
 				name = paste(val1, "-", (val2))
-
+				print(name)
 				idx = which(glmTukeyForAClus$contrasts[1] == name )
 
+				print(glmTukeyForAClus$contrasts[idx,]$z.ratio)
 				mat_zscore[val2-1, val1] <- as.numeric(glmTukeyForAClus$contrasts[idx,]$z.ratio) * -1
 
 				# idx = which(names(zscores) == name)

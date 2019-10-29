@@ -1,4 +1,6 @@
 cols_matFifty = list(col_clus = 1, col_x = 2, col_y = 3, col_dir = 4)
+cols_matFifty_v2 = list(clus = 1, x = 2, y = 3, dir = 4, startTp=5, endTp = 6)
+
 
 cols_clusPlotObjs = list(col_x0 = 1, col_y0 =2, col_x1 = 3, col_y1 = 4, col_col = 5)
 
@@ -24,3 +26,4 @@ color_events = list(up="#ea3424", down="#C99999")
 ################## OTHER CONSTANTS
 
 cols_rectPoints = list(x0=1, x1=2)
+cols_missingStats = list(numNa=1, numTotal=2, percentNa=3)

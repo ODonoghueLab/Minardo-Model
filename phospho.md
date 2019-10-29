@@ -50,7 +50,7 @@ timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, 0.001)
 mat_fiftyPoints <- calc50crossing_v3(timeRegions, clustered) # for centroid and plots
 
 plotClusters_fifty_v2(humphrey.stand, clustered, mat_fiftyPoints)
-plotZP_fifty_v2(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.001)
+plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.001)
 ```
 
 #### 5. Order filtered(/unfiltered events).
