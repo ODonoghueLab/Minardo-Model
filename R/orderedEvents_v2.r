@@ -28,7 +28,7 @@
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calc50crossing}} for identifying events.
 #'
 #' @export
-orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSignif=0.05, phosTh=0.5, dephosTh=0.5, exclTh=0){
+orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSignif=0.05, phosTh=0.5, dephosTh=0.5){ # } exclTh=0){
 	test_param = "t-test"
 	test_nonParam = "wilcox"
 
@@ -50,22 +50,8 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 	list_distributions <- getDistOfAllEvents_v2(mat_fiftyPoints, list_matrices, phosTh, dephosTh)
 
-	mat_missingStats <- missingStats(list_distributions) # exclude events based on percentage missing. mat_fiftyPoints, list_distributions
+	# mat_missingStats <- missingStats(list_distributions) # exclude events based on percentage missing. mat_fiftyPoints, list_distributions
 	# return(mat_missingStats)
-	if (exclTh > 0){
-		list_ <- excludeEvents(mat_missingStats, list_distributions, mat_fiftyPoints, as.numeric(exclTh))
-
-		mat_missingStats <- list_[[1]]
-		list_distributions <- list_[[2]]
-		mat_fiftyPoints <- list_[[3]]
-
-		print(nrow(mat_missingStats))
-		print(length(list_distributions))
-		print(nrow(mat_fiftyPoints))
-
-		print("Events excluded")
-	}
-
 
 	# return (list_distributions)
 
@@ -75,6 +61,7 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	if (test==test_nonParam){
 		print ("Running wilcoxon test.")
 		list_pVal_stat <- performWilcoxonSignedRankTabular(list_distributions)
+
 
 		title_testType = "(Non-parametric)"
 	}
@@ -163,7 +150,7 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 
 	# a set of points to set up the graph.
-	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n", cex.main = 0.8) #,
+	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Clusters",  main=paste("Temporal order of events in clusters", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n", cex.main = 0.8) #,
 
 	# background gray rectangles.
 	if (nrow(mat_bgRects) > 0){
@@ -606,6 +593,20 @@ genDistributions <- function(cluster, numCrossings, list_dir, list_distributions
 }
 
 
+isComparisonPossible <- function(list1, list2){
+	list1 <- list1[!is.na(list1)]
+	list2 <- list2[!is.na(list2)]
+
+	# print(list1)
+
+	if(all(abs(list1 - mean(list1)) < 0.00001) && all(abs(list2 - mean(list2)) < 0.00001) && abs(mean(list1) - mean(list2)) < 0.00001) {
+		return (FALSE)
+		# print("false!!!)")
+	}
+
+
+	return (TRUE)
+}
 
 
 performWilcoxonSignedRankTabular <- function(list_distributions){
@@ -616,11 +617,18 @@ performWilcoxonSignedRankTabular <- function(list_distributions){
 		for (j in 1:length(list_distributions)){
 
 			if (i != j){
-				res <- stats::wilcox.test(list_distributions[[i]][,cols_matFifty$col_x], list_distributions[[j]][,cols_matFifty$col_x], paired=FALSE, conf.int=TRUE)
-				# return (res)
-				# print (res)
-				mat_pVal[i, j] <- res$p.value
-				mat_statistic[i, j] <- res$estimate
+
+				if (!isComparisonPossible(list_distributions[[i]][,cols_matFifty$col_x], list_distributions[[j]][,cols_matFifty$col_x])){ # add as pval = 1 (being the exact same from a uniform distribution).
+					mat_pVal[i, j] <- 1
+					mat_statistic[i, j] <- NA
+				}
+				else{ # do the comparison
+					res <- stats::wilcox.test(list_distributions[[i]][,cols_matFifty$col_x], list_distributions[[j]][,cols_matFifty$col_x], paired=FALSE, conf.int=TRUE)
+					# return (res)
+					# print (res)
+					mat_pVal[i, j] <- res$p.value
+					mat_statistic[i, j] <- res$estimate
+				}
 			}
 		}
 	}
