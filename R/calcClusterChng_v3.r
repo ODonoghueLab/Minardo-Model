@@ -32,22 +32,21 @@ calcClusterChng <- function(Tc, clustered){
 	list_matrices <- splitIntoSubMatrices(Tc, clustered)
 	# print(head(list_matrices[[1]]))
 	list_dfsGlm <- convertMatToDfForGlmFormat(list_matrices)
-	return (list_dfsGlm)
+	# return (list_dfsGlm)
 
-	# list_lm <- runGlmForEachCluster(list_dfsGlm)
+	list_lm <- runGlmForEachCluster(list_dfsGlm)
 	# print("Note: finished creating glm's")
 
-	# list_resSummaries <- runPostHocTukeyForEachClus(list_lm)
+	list_resSummaries <- runPostHocTukeyForEachClus(list_lm)
 	# print("Note: finished post-hoc tukey")
 
-	list_resSummaries <- createGlmTukeyForEachClus(list_dfsGlm)
+	# list_resSummaries <- createGlmTukeyForEachClus(list_dfsGlm)
 	return (list_resSummaries)
 
 
 	# class(list_resSummaries) <- "clusterChange"
 	# return (list_resSummaries)
 }
-
 
 #' @title
 #' Summarize clusterChange and get z-scores and p-values.
@@ -81,8 +80,76 @@ summaryGetZP <- function(list_resSummaries, Tc){
 	for(clustNum in 1:length(list_resSummaries)){
 		for(tp in 2:ncol(Tc)){
 
-			selName = paste((tp-1), "-", tp)
-			name = paste(colnames(Tc)[tp-1], "-", colnames(Tc)[tp])
+			selName = paste(tp, "-", (tp-1))
+			if (!is.null(colnames(Tc))){
+				name = paste(colnames(Tc)[tp], "-", colnames(Tc)[(tp-1)])
+			}
+			else{
+				name = selName
+			}
+
+
+			# print(name)
+			if(clustNum == 1){
+				colNames <- c(colNames, name)
+			}
+
+
+			zScores[clustNum, tp-1] <- list_resSummaries[[clustNum]]$test$tstat[selName]
+
+			idx = which(names(list_resSummaries[[clustNum]]$test$tstat) == selName)
+
+			pValues[clustNum, tp-1] <- list_resSummaries[[clustNum]]$test$pvalues[[idx]]
+
+		}
+	}
+
+
+	colnames(zScores) <- colNames
+	colnames(pValues) <- colNames
+
+	list_concTpSummary[[1]] <- zScores
+	list_concTpSummary[[2]] <- pValues
+
+	class(list_concTpSummary) <- "summary.clusterChange"
+
+	return(list_concTpSummary)
+}
+
+#' @title
+#' Summarize clusterChange and get z-scores and p-values.
+#'
+#' @description
+#' Summarize results obtained by running the "calcClusterChng" function. Specifically this function extracts z-scores and p-values.
+#'
+#' @param list_resSummaries A list returned by the "calcClusterChng" function.
+#' @param Tc The time course data
+#'
+#' @return A list containing two items, where the first item is a z-score matrix, and the second item is a p-value matrix.
+#'
+#' @importFrom methods is
+#'
+#' @seealso \code{\link{calcClusterChng}}
+#'
+#' @export
+summaryGetZP_scheffe <- function(list_resSummaries, Tc){
+
+	# stopifnot(is(list_resSummaries,"clusterChange"), is(Tc, "matrix"))
+
+
+	list_concTpSummary <- list()
+	colNames = c()
+
+	zScores <- matrix(nrow=length(list_resSummaries), ncol=ncol(Tc)-1)
+	pValues <- matrix(nrow=length(list_resSummaries), ncol=ncol(Tc)-1)
+
+
+
+	for(clustNum in 1:length(list_resSummaries)){
+		for(tp in 2:ncol(Tc)){
+
+			selName = paste((tp), "-", tp-1)
+			name = paste(colnames(Tc)[tp], "-", colnames(Tc)[tp-1])
 
 			print(selName)
 			if(clustNum == 1){
@@ -194,9 +261,9 @@ runPostHocTukeyForEachClus <- function(list_lms){
 	list_tukeys <- list()
 
 	for (clustNum in 1:length(list_lms)){
-		list_tukeys[[clustNum]] <- emmeans(list_lms[[clustNum]], pairwise ~ fac_timepoint, adjust="tukey")
+		# list_tukeys[[clustNum]] <- emmeans(list_lms[[clustNum]], pairwise ~ fac_timepoint, adjust="tukey")
 
-		 #  summary(multcomp::glht(list_lms[[clustNum]], multcomp::mcp(fac_timepoint="Tukey")))
+		list_tukeys[[clustNum]] <- summary(multcomp::glht(list_lms[[clustNum]], multcomp::mcp(fac_timepoint="Tukey")))
 	}
 
 	return (list_tukeys)
