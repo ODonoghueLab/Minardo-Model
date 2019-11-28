@@ -150,12 +150,16 @@ calc50crossing_v3 <- function(timeRegions, clustered, phosTh=0.5, dephosTh=0.5){
 			startTp = as.integer(min(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
 			endTp = as.integer(max(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
 
-
 			#print("Value here..?")
 			# print(paste(startTp, endTp))
 			# print(clustered$center[clusNum, startTp:endTp])
-
+			# print(paste("Cluster ", clusNum))
 			crossPt <- calcCrossing_v3(clustered$center[clusNum, startTp:endTp], timeRegions[[clusNum]][i, cols_timeReg$dir], (startTp -1), phosTh, dephosTh)
+
+			# print(paste(".... ", startTp, endTp, crossPt[1], crossPt[2], timeRegions[[clusNum]][i, cols_timeReg$dir]))
+			if (crossPt[1] == -1){
+				# print(clustered$center[clusNum, startTp:endTp])
+			}
 			# print(crossPt[1])
 			mat_fiftyPoints <- addToMatrixWithRegionInfo(mat_fiftyPoints, clusNum, crossPt[1], crossPt[2], timeRegions[[clusNum]][i, cols_timeReg$dir], startTp, endTp)
 		}
@@ -175,7 +179,7 @@ addToMatrixWithRegionInfo <- function(theMat, clusNum, x_50, y_50, direction, tp
 calcCrossing_v3 <- function(region, dir, offset, phosTh, dephosTh){
 
 	x_50 <- -1 # initial time
-	y_50 <- -1
+	y_50 <- -1 # initial th_point
 
 	y_max <- max(region)
 	y_min <- min(region)
@@ -189,7 +193,7 @@ calcCrossing_v3 <- function(region, dir, offset, phosTh, dephosTh){
 		y_50 <- y_min + y_10Percent
 	}
 
-	# print(paste("Value here is: ", y_max, y_min, y_50))
+
 
 	# y_50 <- (y_max + y_min)/2
 
@@ -209,8 +213,10 @@ calcCrossing_v3 <- function(region, dir, offset, phosTh, dephosTh){
 			# getMidX()
 			x_50 <- getMidX((offset+j-1), region[j-1], offset+j, region[j], y_50)
 			# mat_fiftyPoints <- addToMatrix(mat_fiftyPoints, clusNum, x_50, y_50, -1)
+
 		}
 	}
+	# print(paste("Value here is: ", y_min, y_max, y_50, x_50))
 	# print(paste(y_50, x_50, sep=" ... "))
 	return (c(x_50, y_50))
 }
@@ -225,6 +231,7 @@ getTimeRegionsWithMaximalChange <- function(glmTukeyForEachClus, numTps, signifT
 		# convert z-scores to matrix (by time * time)
 		combined <- convertToMatAndAddNAs(glmTukeyForEachClus[[i]], numTps, signifTh)
 
+		# print(combined)
 
 		# printZPmat(combined)
 		# Convert regions to 0 which cannot statisfy zscoreTh.
@@ -235,6 +242,8 @@ getTimeRegionsWithMaximalChange <- function(glmTukeyForEachClus, numTps, signifT
 		#print("time regions (with overlaps)")
 		#print(timeRegions)
 		# printTimeRegions(timeRegions)
+
+		# print(timeRegions[nrow(timeRegions),])
 		timeRegions_noOverlaps<- removeAnyOverlaps(timeRegions)
 		# addToList(timeRegions_noOverlaps, somelistOfGlobals)
 		#print("time regions without overlaps")
@@ -257,8 +266,8 @@ filterByZscore <- function(combined, phosZscoreTh, dephosZscoreTh, asPercent){
 		for (colNum in 1:ncol(combined)){
 
 			if (!is.na(combined[rowNum, colNum]) && combined[rowNum, colNum] > 0 &&combined[rowNum, colNum] < phosZscoreTh){
-				print("here...")
-				print(combined[rowNum, colNum])
+				# print("here...")
+				# print(combined[rowNum, colNum])
 				combined[rowNum, colNum] <- 0
 
 				# print(combined[rowNum, colNum])
@@ -266,8 +275,8 @@ filterByZscore <- function(combined, phosZscoreTh, dephosZscoreTh, asPercent){
 			}
 
 			if (!is.na(combined[rowNum, colNum]) && combined[rowNum, colNum] < 0 && combined[rowNum, colNum] > dephosZscoreTh){
-				print("over here...")
-				print(combined[rowNum, colNum])
+				# print("over here...")
+				# print(combined[rowNum, colNum])
 				combined[rowNum, colNum] <- 0
 
 				# removeIfAnyEventAffected(mat_fiftyPoints, rowNum, colNum)
@@ -382,7 +391,7 @@ traverseRow <- function(combined, row, col, currMaxMin){
 	aRow = c()
 
 	while(col > 0){
-		print(combined[row, col])
+		# print(combined[row, col])
 		col = col - 1
 	}
 
@@ -391,7 +400,14 @@ traverseRow <- function(combined, row, col, currMaxMin){
 
 
 addToTimeRegionsMat <- function(timeRegions, cluster, zScore, tpStart, tpEnd, direction){
+	# dir = -1
+	# if (zScore > 0){
+	#	dir = 1
+	# }
 	tpStart = tpStart + 1
+	# startReg = min(tpStart, tpEnd)
+	# endReg = max(tpStart, tpEnd)
+
 	timeRegions <- rbind(timeRegions, c(cluster, zScore, tpStart, tpEnd, direction))
 
 	return(timeRegions)
@@ -422,7 +438,8 @@ findMonotonicRegions <- function(combined, cluster){
 				if (currMaxMin < 0){
 					timeRegions <- addToTimeRegionsMat(timeRegions, cluster, combined[rowEnd, colEnd], rowEnd, colEnd, direction)
 
-					# print(paste(rowStart, colStart, rowEnd+1, colEnd, combined[rowEnd, colEnd]))
+					# print("Set 1: ")
+					# print(paste(cluster, rowStart, colStart, rowEnd+1, colEnd, combined[rowEnd, colEnd], direction))
 				}
 				# new one encountered in + dir.
 				direction = 1
@@ -446,6 +463,9 @@ findMonotonicRegions <- function(combined, cluster){
 				if (currMaxMin > 0){
 					# print(paste(rowStart, colStart, rowEnd+1, colEnd, combined[rowEnd, colEnd]))
 					timeRegions <- addToTimeRegionsMat(timeRegions, cluster, combined[rowEnd, colEnd], rowEnd, colEnd, direction)
+
+					# print("Set 2: ")
+					# print(paste(cluster, rowStart, colStart, rowEnd+1, colEnd, combined[rowEnd, colEnd], direction))
 				}
 				# new one encountered in + dir.
 				direction = -1
@@ -513,12 +533,17 @@ convertToMatAndAddNAs <- function(glmTukeyForAClus, numTps, signifTh){
 
 				name = paste(val2, "-", (val1))
 				# print(name)
+
 				idx = which(names(glmTukeyForAClus$test$tstat) == name )
+				# print(paste(idx , name))
 				# print(glmTukeyForAClus$test$tstat[idx])
 		# 		print(glmTukeyForAClus$contrasts[idx,]$z.ratio)
+
+
 				mat_zscore[val2-1, val1] <- as.numeric(glmTukeyForAClus$test$tstat[idx]) # * -1
 
 				# idx = which(names(zscores) == name)
+
 				mat_pvalue[val2-1, val1] <- glmTukeyForAClus$test$pvalues[[idx]]
 
 				if(as.numeric(mat_pvalue[val2-1, val1]) < signifTh){

@@ -40,26 +40,32 @@ plotClusters(humphrey.stand, clustered)
 
 glmTukeyForEachClus <- calcClusterChng(humphrey.stand, clustered)
 glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, humphrey.stand)
-resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
+resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary, 0.05)
+
+
+
+glmTukeyForEachClus <- calcClusterChng(ge.stand, clustered)
+glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, ge.stand)
+resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary, 0.05)
 
 ```
 #### 4. Determine events based on 3. (i.e. use z-scores to set threshold for calculating events.)
 
 ```R
-timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, 0.001, ... )
+timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, phosZscoreTh=15, dephosZscoreTh=-15 )
 mat_fiftyPoints <- calc50crossing_v3(timeRegions, clustered) # for centroid and plots
-
+  # rearrange mat_fiftyPoints (else causes issues in orderTheEvents())
 plotClusters_fifty_v2(humphrey.stand, clustered, mat_fiftyPoints)
-plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.001)
-```
-
-#### 5. Filter events with high variation.
-
-```R
-
-mat_filteredEvents <- filterEvents(mat_fiftyPoints, resWithOnlySignif, phosZscoreTh, dephosZscoreTh, asPercent)
+plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.05)
 
 
+
+
+timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 7,phosZscoreTh=15, dephosZscoreTh=-15 )
+mat_fiftyPoints <- calc50crossing_v3(timeRegions, clustered)
+
+plotClusters_fifty_v2(ge.stand, clustered, mat_fiftyPoints)
+plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.05)
 ```
 
 
@@ -68,7 +74,12 @@ mat_filteredEvents <- filterEvents(mat_fiftyPoints, resWithOnlySignif, phosZscor
 Order events (using mean or median) & plot.
 
 ```R
+mat_fiftyPoints <- mat_fiftyPoints[order(mat_fiftyPoints[,1],mat_fiftyPoints[,2]),]
+
+
 orderTheEvents(humphrey.stand, clustered, mat_fiftyPoints)
+
+orderTheEvents(ge.stand, clustered, mat_fiftyPoints)
 ```
 
 #### 6. Publication ready:

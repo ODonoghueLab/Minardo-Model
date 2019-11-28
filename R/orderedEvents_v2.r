@@ -141,6 +141,8 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	# print("The max x is ")
 	# print(max(as.numeric(mat_eventPoints[,cols_matFifty$col_x])))
 	mat_clusConnLines <- getClusConnLines(mat_eventPoints, blockStart_x, blockEnd_x)
+	print("The mat clus conn lines")
+	print(mat_clusConnLines)
 	vec_labels <- getYaxisLabels(mat_eventPoints)
 
 
@@ -163,9 +165,9 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	}
 
 	# axis labels on sides 2 and 4.
-	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.05,  col = NA ) #, col.ticks = 1)
+	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.02,  col = NA ) #, col.ticks = 1)
 
-	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.05,  col = NA ) #, col.ticks = 1)
+	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.02,  col = NA ) #, col.ticks = 1)
 
 
 	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col="#808080", lty="dotted", lwd=0.5)
@@ -266,7 +268,7 @@ missingStats <- function(list_distributions){
 
 		mat_missingStats <- rbind(mat_missingStats, c(numNa, numTotal, percentNa))
 
-		print(paste(eventNum, numNa, numTotal, percentNa, sep=" "))
+		# print(paste(eventNum, numNa, numTotal, percentNa, sep=" "))
 	}
 
 	mat_missingStats <- mat_missingStats[-1,,drop=FALSE]
@@ -517,7 +519,7 @@ genDistForEvent <- function(clusMat, dir, startTp, endTp, phosTh, dephosTh){
 
 		if ((dir == 1 && clusMat[profNum, startTp] < clusMat[profNum, endTp]) || (dir == -1 && clusMat[profNum, startTp] > clusMat[profNum, endTp])){
 			# direction holds; do calculation, and save.
-			print(clusMat[profNum, startTp:endTp])
+			# print(clusMat[profNum, startTp:endTp])
 
 			crossPt <- calcCrossing_v3(clusMat[profNum, startTp:endTp], dir, (startTp -1), phosTh, dephosTh)
 
@@ -1008,7 +1010,7 @@ getRectBlock <- function(list_eventsOrder, signifs){
 
 
 addToRectPoints <- function(rectPoints, events, mat_eventPoints){
-	print(max(as.numeric(mat_eventPoints[events, cols_matFifty$col_x])))
+	# print(max(as.numeric(mat_eventPoints[events, cols_matFifty$col_x])))
 	maxX <- max(as.numeric(mat_eventPoints[events, cols_matFifty$col_x]))
 
 	rowVal = c()
@@ -1207,7 +1209,7 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs, list_blo
 
 		# adding x coordinate
 		if (i == 1){
-
+			#print("over here..?")
 			mat_eventPoints <- addXForAll(list_eventsOrder[[i]], mat_eventPoints, x)
 		}
 		else{
@@ -1223,6 +1225,9 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs, list_blo
 
 		}
 	}
+
+	# print("The mat event points:")
+	# print (mat_eventPoints)
 	return (mat_eventPoints)
 
 }
