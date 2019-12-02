@@ -22,6 +22,7 @@ color_events = list(up="#ea3424", down="#C99999")
 # background boxes - #ededed
 
 
+eventOrderTest = list(param="t-test", nonParam="wilcox")
 
 ################## OTHER CONSTANTS
 

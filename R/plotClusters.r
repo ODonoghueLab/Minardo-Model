@@ -63,7 +63,7 @@ plotClusters <- function (Tc, clustered, plotNumCol=5){
 #'
 #' @importFrom graphics axis lines par plot points
 #' @importFrom grDevices adjustcolor
-plotClusters_fifty <- function (Tc, clustered, mat_fiftyPoints, plotNumCol=5){
+plotClusters_fifty_old <- function (Tc, clustered, mat_fiftyPoints, plotNumCol=5){
 
   stopifnot(is(clustered, "fclust"), is(Tc, "matrix"))
 
@@ -122,7 +122,7 @@ plotClusters_fifty <- function (Tc, clustered, mat_fiftyPoints, plotNumCol=5){
 
 
 #### MAIN FUNCTION 3.
-plotClusters_fifty_v2 <- function (Tc, clustered, mat_fiftyPoints, plotNumCol=5){
+plotClusters_withEvents <- function (Tc, clustered, mat_fiftyPoints, plotNumCol=5){
 
   stopifnot(is(clustered, "fclust"), is(Tc, "matrix"))
 

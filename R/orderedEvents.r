@@ -1,5 +1,5 @@
 #' @title
-#' Orders clusters based on time of the 50\% percent abundance crossings
+#' Calculate the ordering of events
 #'
 #' @description
 #' Here, the events identified from the centroids are used to generate time-distributions using profiles in the clusters. From these distributions, a matrix (either by running t-test or wilcox) is generated of the p-values and the t-statistic (or the 95\% confidence interval, respectively). The p-values are FDR corrected and are used to define a graph, where events with significant time differences are ordered according to the t-statistic (for t-test) or the 95\% confidence interval (for wilcox test). This matrix is transitively reduced and is used to generate the ordering and the resulting figure.
@@ -28,15 +28,12 @@
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calc50crossing}} for identifying events.
 #'
 #' @export
-orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSignif=0.05 ){
-	test_param = "t-test"
-	test_nonParam = "wilcox"
+calculateOrder <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSignif=0.05, phosEventTh=0.5, dephosEventTh=0.5){
 
-	title_testType = ""
 
 	stopifnot(is(Tc, "matrix"), is(clustered, "fclust"), is(mat_fiftyPoints, "matrix"))
 
-	if (!(test == test_param) && !(test == test_nonParam)){
+	if (!(test == eventOrderTest$param) && !(test == eventOrderTest$nonParam)){
 		stop(paste("Test ", test, " not recognized.", sep=""))
 	}
 
@@ -45,16 +42,22 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	}
 
 
-
 	list_matrices <- splitIntoSubMatrices(Tc, clustered)
 
-	list_distributions <- getDistOfAllEvents(mat_fiftyPoints, list_matrices)
+	list_distributions <- getDistOfAllEvents_v2(mat_fiftyPoints, list_matrices, phosEventTh, dephosEventTh)
+
+	# mat_missingStats <- missingStats(list_distributions) # exclude events based on percentage missing. mat_fiftyPoints, list_distributions
+	# return(mat_missingStats)
+
+	# return (list_distributions)
+
 
 	list_pVal_stat <- list()
 
-	if (test==test_nonParam){
+	if (test==eventOrderTest$nonParam){
 		print ("Running wilcoxon test.")
 		list_pVal_stat <- performWilcoxonSignedRankTabular(list_distributions)
+
 
 		title_testType = "(Non-parametric)"
 	}
@@ -91,8 +94,27 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	mat_fiftyPts_withOrder <- appendOrder(mat_fiftyPoints, list_eventsOrder)
 
 
+	res <- list(mat_fiftyPts_withOrder, list_eventsOrder, signifs, test)
+	names(res) <- c("mat_events_withOrder", "individEventOrder", "signifs", "test")
+	return (res)
 
+
+}
+
+# Visualise the ordering of events
+visualizeOrder <- function(mat_fiftyPts_withOrder, list_eventsOrder, signifs, test){
+
+	title_testType = ""
 	## Getting other things ready for plotting
+
+	if (test==eventOrderTest$nonParam){
+		title_testType = "(Non-parametric)"
+	}
+	else {
+		title_testType = "(Parametric)"
+	}
+
+
 
 	# plotting constants
 	sigEventsDiff_x = 0.5
@@ -117,7 +139,7 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 	# plotting values
 	list_blocks <- getRectBlock(list_eventsOrder, signifs)
-	mat_eventPoints <- getTheClusLines(mat_fiftyPoints, list_eventsOrder, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, lineDiff_y)
+	mat_eventPoints <- getTheClusLines(mat_fiftyPts_withOrder, list_eventsOrder, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, lineDiff_y)
 
 	eventEnd_x = max(as.numeric(mat_eventPoints[,cols_matFifty$col_x])) #  + blockSpacingFmEvent_x
 	blockEnd_x = eventEnd_x + blockSpacingFmEvent_x
@@ -131,19 +153,16 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	mat_grayLines <- getGrayLines(mat_eventPoints, signifs)
 	mat_grayLines_v2 <- getGrayLines_v2(list_eventsOrder, mat_eventPoints, signifs)
 
-	# print("The max x is ")
-	# print(max(as.numeric(mat_eventPoints[,cols_matFifty$col_x])))
+
 	mat_clusConnLines <- getClusConnLines(mat_eventPoints, blockStart_x, blockEnd_x)
+
 	vec_labels <- getYaxisLabels(mat_eventPoints)
 
 
 	mat_xLabelsClus <- getXaxisLabels(list_eventsOrder, mat_eventPoints, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, yLabelInit, yLabelSpace);
 
-	# constants
-
-
 	# a set of points to set up the graph.
-	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Cluster",  main=paste("Clusters ordered by significant order of occurance of events ", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n", cex.main = 0.8) #,
+	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Clusters",  main=paste("Temporal order of events in clusters", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n", cex.main = 0.8) #,
 
 	# background gray rectangles.
 	if (nrow(mat_bgRects) > 0){
@@ -156,9 +175,9 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	}
 
 	# axis labels on sides 2 and 4.
-	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.05,  col = NA ) #, col.ticks = 1)
+	graphics::axis(side=2, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.02,  col = NA ) #, col.ticks = 1)
 
-	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.05,  col = NA ) #, col.ticks = 1)
+	graphics::axis(side=4, las=1, at=seq(1,length(vec_labels)), labels=rev(vec_labels), cex=0.02,  col = NA ) #, col.ticks = 1)
 
 
 	graphics::segments(x0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x0]), y0=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y0]), x1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_x1]), y1=as.numeric(mat_grayLines[,cols_clusPlotObjs$col_y1]), col="#808080", lty="dotted", lwd=0.5)
@@ -173,8 +192,8 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 
 	# the events (arrows) within a graph
-	mat_upEvents = mat_eventPoints[mat_fiftyPoints[,cols_matFifty$col_dir] == 1,]
-	mat_downEvents = mat_eventPoints[mat_fiftyPoints[,cols_matFifty$col_dir] == -1,]
+	mat_upEvents = mat_eventPoints[mat_fiftyPts_withOrder[,cols_matFifty$col_dir] == 1,]
+	mat_downEvents = mat_eventPoints[mat_fiftyPts_withOrder[,cols_matFifty$col_dir] == -1,]
 
 
 	# print(mat_upEvents)
@@ -197,9 +216,9 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	graphics::segments(x0=as.numeric(straightGrayLines[,cols_grayLines_v2$col_x0]), y0=rep(yPos_eventPts, length(straightGrayLines)), x1=as.numeric(straightGrayLines[,cols_grayLines_v2$col_x1]), y1=rep(yPos_eventPts, length(straightGrayLines)), lwd=1, col="#A2A2A2") #, lty="dotted")
 
 	# gray curves in events points map
-	mat_curvePoints = mat_grayLines_v2[mat_grayLines_v2[,cols_grayLines_v2$col_isSemiCirc] == TRUE,]
+	mat_curvePoints = mat_grayLines_v2[mat_grayLines_v2[,cols_grayLines_v2$col_isSemiCirc] == TRUE,,drop=FALSE]
 
-	if (nrow(mat_curvePoints) > 0){
+	if (length(mat_curvePoints) > 0 && nrow(mat_curvePoints) > 0){
 		for (i in 1:nrow(mat_curvePoints)){
 			list_pts = calcCurves(mat_curvePoints[i, cols_grayLines_v2$col_x0], mat_curvePoints[i, cols_grayLines_v2$col_x1], -1)
 			graphics::lines(list_pts[[1]], list_pts[[2]], col="#A2A2A2")
@@ -231,7 +250,21 @@ orderTheEvents <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 	# x label text.
 	graphics::text(x=as.numeric(mat_xLabelsClus[,1]), y=as.numeric(mat_xLabelsClus[,2]), labels=mat_xLabelsClus[,3], offset=0, cex=0.5, col=mat_xLabelsClus[,4])
 
-	return (mat_fiftyPts_withOrder)
+
+}
+
+
+
+excludeEvents <- function(mat_missingStats, list_distributions, mat_fiftyPoints, exclTh){
+	list_ <- list()
+
+	idxToExcl <- which(mat_missingStats[,cols_missingStats$percentNa] > exclTh)
+
+	list_[[1]] <- mat_missingStats[-idxToExcl,]
+	list_[[2]] <- list_distributions[-idxToExcl]
+	list_[[3]] <- mat_fiftyPoints[-idxToExcl,]
+
+	return(list_)
 }
 
 
@@ -460,6 +493,41 @@ getNumOfCrossingAndDir <- function(mat_fiftyPoints, clusNum){
 }
 
 
+getDistOfAllEvents_v2 <- function(mat_fiftyPoints, list_matrices, phosTh, dephosTh){
+	list_distributions <- list()
+
+	for (eventNum in 1:nrow(mat_fiftyPoints)){
+		dist <- genDistForEvent(list_matrices[[mat_fiftyPoints[eventNum,cols_matFifty_v2$clus]]], mat_fiftyPoints[eventNum, cols_matFifty_v2$dir], mat_fiftyPoints[eventNum, cols_matFifty_v2$startTp], mat_fiftyPoints[eventNum, cols_matFifty_v2$endTp], phosTh, dephosTh)
+
+		list_distributions[[length(list_distributions) + 1]] <-  dist
+	}
+
+	return(list_distributions)
+}
+
+genDistForEvent <- function(clusMat, dir, startTp, endTp, phosTh, dephosTh){
+	mat_distribution <- matrix(ncol=4)
+
+
+	for (profNum in 1:nrow(clusMat)){
+
+		if ((dir == 1 && clusMat[profNum, startTp] < clusMat[profNum, endTp]) || (dir == -1 && clusMat[profNum, startTp] > clusMat[profNum, endTp])){
+			# direction holds; do calculation, and save.
+			# print(clusMat[profNum, startTp:endTp])
+
+			crossPt <- calcCrossing_v3(clusMat[profNum, startTp:endTp], dir, (startTp -1), phosTh, dephosTh)
+
+			mat_distribution <- addToMatrix(mat_distribution, profNum, crossPt[1], crossPt[2], dir)
+
+		}
+		else{
+			mat_distribution <- addToMatrix(mat_distribution, profNum, NA, NA, dir)
+		}
+	}
+
+	mat_distribution <- mat_distribution[-1,, drop=FALSE]
+	return (mat_distribution)
+}
 
 getDistOfAllEvents <- function(mat_fiftyPoints, list_matrices){
 	list_distributions <- list()
@@ -521,6 +589,20 @@ genDistributions <- function(cluster, numCrossings, list_dir, list_distributions
 }
 
 
+isComparisonPossible <- function(list1, list2){
+	list1 <- list1[!is.na(list1)]
+	list2 <- list2[!is.na(list2)]
+
+	# print(list1)
+
+	if(all(abs(list1 - mean(list1)) < 0.00001) && all(abs(list2 - mean(list2)) < 0.00001) && abs(mean(list1) - mean(list2)) < 0.00001) {
+		return (FALSE)
+		# print("false!!!)")
+	}
+
+
+	return (TRUE)
+}
 
 
 performWilcoxonSignedRankTabular <- function(list_distributions){
@@ -531,11 +613,18 @@ performWilcoxonSignedRankTabular <- function(list_distributions){
 		for (j in 1:length(list_distributions)){
 
 			if (i != j){
-				res <- stats::wilcox.test(list_distributions[[i]][,cols_matFifty$col_x], list_distributions[[j]][,cols_matFifty$col_x], paired=FALSE, conf.int=TRUE)
-				# return (res)
-				# print (res)
-				mat_pVal[i, j] <- res$p.value
-				mat_statistic[i, j] <- res$estimate
+
+				if (!isComparisonPossible(list_distributions[[i]][,cols_matFifty$col_x], list_distributions[[j]][,cols_matFifty$col_x])){ # add as pval = 1 (being the exact same from a uniform distribution).
+					mat_pVal[i, j] <- 1
+					mat_statistic[i, j] <- NA
+				}
+				else{ # do the comparison
+					res <- stats::wilcox.test(list_distributions[[i]][,cols_matFifty$col_x], list_distributions[[j]][,cols_matFifty$col_x], paired=FALSE, conf.int=TRUE)
+					# return (res)
+					# print (res)
+					mat_pVal[i, j] <- res$p.value
+					mat_statistic[i, j] <- res$estimate
+				}
 			}
 		}
 	}
@@ -915,7 +1004,7 @@ getRectBlock <- function(list_eventsOrder, signifs){
 
 
 addToRectPoints <- function(rectPoints, events, mat_eventPoints){
-	print(max(as.numeric(mat_eventPoints[events, cols_matFifty$col_x])))
+	# print(max(as.numeric(mat_eventPoints[events, cols_matFifty$col_x])))
 	maxX <- max(as.numeric(mat_eventPoints[events, cols_matFifty$col_x]))
 
 	rowVal = c()
@@ -1114,7 +1203,7 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs, list_blo
 
 		# adding x coordinate
 		if (i == 1){
-
+			#print("over here..?")
 			mat_eventPoints <- addXForAll(list_eventsOrder[[i]], mat_eventPoints, x)
 		}
 		else{
@@ -1130,6 +1219,9 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs, list_blo
 
 		}
 	}
+
+	# print("The mat event points:")
+	# print (mat_eventPoints)
 	return (mat_eventPoints)
 
 }

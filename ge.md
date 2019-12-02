@@ -59,6 +59,23 @@ Fig. 2: Heatmap showing z-scores for each of the clusters (x-axis) at time-inter
 
 
 
+```R
+glmTukeyForEachClus <- calcClusterChng(ge.stand, clustered)
+glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, ge.stand)
+resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary, 0.05)
+
+```
+
+
+
+
+timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 7,phosZscoreTh=15, dephosZscoreTh=-15 )
+mat_fiftyPoints <- calc50crossing_v3(timeRegions, clustered)
+
+plotClusters_fifty_v2(ge.stand, clustered, mat_fiftyPoints)
+plotZP_fifty(glmTukeyForEachClus.summary, mat_fiftyPoints, 0.05)
+
+
 #### 4. Calculate events
 
 ```R

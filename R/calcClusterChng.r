@@ -30,21 +30,21 @@ calcClusterChng <- function(Tc, clustered){
 	stopifnot(is(clustered, "fclust"), is(Tc, "matrix"))
 
 	list_matrices <- splitIntoSubMatrices(Tc, clustered)
-	# print(head(list_matrices[[1]]))
 	list_dfsGlm <- convertMatToDfForGlmFormat(list_matrices)
-	# return (list_dfsGlm)
 
 	list_lm <- runGlmForEachCluster(list_dfsGlm)
-	print("Note: finished creating glm's")
+	# print("Note: finished creating glm's")
 
-	# return (list_lm)
 	list_resSummaries <- runPostHocTukeyForEachClus(list_lm)
-	print("Note: finished post-hoc tukey")
+	# print("Note: finished post-hoc tukey")
+
+	# list_resSummaries <- createGlmTukeyForEachClus(list_dfsGlm)
+	# return (list_resSummaries)
+
 
 	class(list_resSummaries) <- "clusterChange"
 	return (list_resSummaries)
 }
-
 
 #' @title
 #' Summarize clusterChange and get z-scores and p-values.
@@ -79,7 +79,13 @@ summaryGetZP <- function(list_resSummaries, Tc){
 		for(tp in 2:ncol(Tc)){
 
 			selName = paste(tp, "-", (tp-1))
-			name = paste(colnames(Tc)[tp], "-", colnames(Tc)[(tp-1)])
+			if (!is.null(colnames(Tc))){
+				name = paste(colnames(Tc)[tp], "-", colnames(Tc)[(tp-1)])
+			}
+			else{
+				name = selName
+			}
+
 
 			# print(name)
 			if(clustNum == 1){
@@ -97,6 +103,67 @@ summaryGetZP <- function(list_resSummaries, Tc){
 	}
 
 
+	colnames(zScores) <- colNames
+	colnames(pValues) <- colNames
+
+	list_concTpSummary[[1]] <- zScores
+	list_concTpSummary[[2]] <- pValues
+
+	class(list_concTpSummary) <- "summary.clusterChange"
+
+	return(list_concTpSummary)
+}
+
+#' @title
+#' Summarize clusterChange and get z-scores and p-values.
+#'
+#' @description
+#' Summarize results obtained by running the "calcClusterChng" function. Specifically this function extracts z-scores and p-values.
+#'
+#' @param list_resSummaries A list returned by the "calcClusterChng" function.
+#' @param Tc The time course data
+#'
+#' @return A list containing two items, where the first item is a z-score matrix, and the second item is a p-value matrix.
+#'
+#' @importFrom methods is
+#'
+#' @seealso \code{\link{calcClusterChng}}
+#'
+#' @export
+summaryGetZP_scheffe <- function(list_resSummaries, Tc){
+
+	# stopifnot(is(list_resSummaries,"clusterChange"), is(Tc, "matrix"))
+
+
+	list_concTpSummary <- list()
+	colNames = c()
+
+	zScores <- matrix(nrow=length(list_resSummaries), ncol=ncol(Tc)-1)
+	pValues <- matrix(nrow=length(list_resSummaries), ncol=ncol(Tc)-1)
+
+
+
+	for(clustNum in 1:length(list_resSummaries)){
+		for(tp in 2:ncol(Tc)){
+
+			selName = paste((tp), "-", tp-1)
+			name = paste(colnames(Tc)[tp], "-", colnames(Tc)[tp-1])
+
+			print(selName)
+			if(clustNum == 1){
+				colNames <- c(colNames, name)
+			}
+
+			idx = which(glmTukeyForEachClus[[clustNum]]$contrasts[1] == selName )
+
+			zScores[clustNum, tp-1] <- as.numeric(list_resSummaries[[clustNum]]$contrasts[idx,]$z.ratio) * -1
+
+			pValues[clustNum, tp-1] <- list_resSummaries[[clustNum]]$contrasts[idx,]$p.value
+
+		}
+	}
+
+	print(colNames)
 	colnames(zScores) <- colNames
 	colnames(pValues) <- colNames
 
@@ -174,7 +241,6 @@ plotZP <- function(list_concTpSummary, significanceTh=0.5){
 
 
 	titleTxt = paste("Significant changes\n(z-values of intervals,\n with significance p \u003C", significanceTh, ")", sep="")
-	# print(titleTxt)
 
 	gplots::heatmap.2(matToPlot, main=titleTxt, xlab="Time interval", ylab="Cluster", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="#cfcfcf", tracecol=NA, density.info="none", sepcolor="#cfcfcf", sepwidth=c(0.001, 0.001), colsep=0:ncol(matToPlot), rowsep=0:nrow(matToPlot), srtCol=45, cexCol=0.8)
 
@@ -192,6 +258,8 @@ runPostHocTukeyForEachClus <- function(list_lms){
 	list_tukeys <- list()
 
 	for (clustNum in 1:length(list_lms)){
+		# list_tukeys[[clustNum]] <- emmeans(list_lms[[clustNum]], pairwise ~ fac_timepoint, adjust="tukey")
+
 		list_tukeys[[clustNum]] <- summary(multcomp::glht(list_lms[[clustNum]], multcomp::mcp(fac_timepoint="Tukey")))
 	}
 
@@ -216,6 +284,22 @@ runGlmForEachCluster <- function(list_dfsGlm){
 }
 
 
+createGlmTukeyForEachClus <- function(list_dfsGlm){
+	list_lm <- list()
+	list_tukeys <- list()
+
+
+
+	for (clusNum in 1:length(list_dfsGlm)){
+		aGlm <- stats::glm(formula=experimentalObs ~ fac_profileNum + fac_timepoint, data=list_dfsGlm[[clusNum]]) # setting up the glm
+		list_tukeys[[clusNum]] <- summary(emmeans(aGlm, pairwise ~ fac_timepoint, adjust="tukey")) # running glm, and computing pairwise contrasts
+
+		# list_lm[[dfNum]] <- aGlm
+	}
+
+
+	return (list_tukeys)
+}
 #' Convert a list of matrices of each cluster, to a list of data frames (in the required glm format) for each cluster. Timepoint, and profileNum are factors, and experimentalObs (ratio) is y.
 #'
 #' @param list_matrices A list of matrices for each cluster
@@ -244,12 +328,14 @@ convertMatToDfForGlmFormat <- function(list_matrices){
 
 		glmDf <- data.frame(fac_timepoint, fac_profileNum, experimentalObs)
 		# add this df to the list
-		glmDf$fac_timepoint <- as.factor(glmDf$fac_timepoint)
-		glmDf$fac_profileNum <- as.factor(glmDf$fac_profileNum)
+		# print(glmDf$fac_timepoint)
+		glmDf$fac_timepoint <- factor(glmDf$fac_timepoint, ordered=TRUE)
+		glmDf$fac_profileNum <- factor(glmDf$fac_profileNum) # , ordered=TRUE)
 
 		list_dfsGlm[[clustNum]] <- glmDf
 
 	}
+
 	return(list_dfsGlm)
 }
 
