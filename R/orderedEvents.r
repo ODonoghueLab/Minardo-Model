@@ -92,7 +92,7 @@ calculateOrder <- function(Tc, clustered, mat_fiftyPoints, test="wilcox", fdrSig
 
 
 	mat_fiftyPts_withOrder <- appendOrder(mat_fiftyPoints, list_eventsOrder)
-
+	print(list_eventsOrder)
 
 	res <- list(mat_fiftyPts_withOrder, list_eventsOrder, signifs, test)
 	names(res) <- c("mat_events_withOrder", "individEventOrder", "signifs", "test")
@@ -253,6 +253,65 @@ visualizeOrder <- function(mat_fiftyPts_withOrder, list_eventsOrder, signifs, te
 
 }
 
+rearrangeClusters <- function(clustered, theOrder){
+	clusterOrder <- matrix(ncol=1, nrow=max(theOrder$mat_events_withOrder[,cols_matFifty_v2$clus]), data=NA) # the row numb stores the original order
+	# print(clusterOrder)
+	orderCounter = 1
+	for (i in 1:length(theOrder$individEventOrder)){
+		for (j in 1:length(theOrder$individEventOrder[[i]])){
+
+			clusNum = theOrder$mat_events_withOrder[theOrder$individEventOrder[[i]][j], cols_matFifty_v2$clus]
+
+			if (is.na(clusterOrder[clusNum, 1])){
+				# print(paste(clusNum, orderCounter))
+				clusterOrder[clusNum, 1] <- orderCounter;
+
+				orderCounter = orderCounter + 1;
+				# print(clusterOrder)
+			}
+		}
+	}
+	# return(clusterOrder)
+	clusters = clustered$cluster
+	centers = duplicate(clustered$centers)
+	for (origOrder in 1:nrow(clusterOrder)){
+		# print(paste(origOrder, clusterOrder[origOrder,1]))
+		clustered$cluster[clusters == origOrder] = clusterOrder[origOrder,1]
+		clustered$center[clusterOrder[origOrder,1], ] = centers[origOrder,]
+	}
+	return (clustered)
+}
+
+
+rearrangeClusters_old <- function(clustered, mat_withOrder){
+
+	copyOfClustered <- clustered #
+	centers <- clustered$center
+
+	i = 1
+	while (i < nrow(mat_withOrder)){
+		minValForClus = mat_withOrder[i, cols_orderedEvents$col_order]
+		j = i + 1
+		while(j < nrow(mat_withOrder) && mat_withOrder[j, cols_matFifty_v2$clus] == mat_withOrder[i, cols_matFifty_v2$clus]){
+			if (mat_withOrder[i, cols_orderedEvents$col_order] < minValForClus){
+				minValForClus <- mat_withOrder[i, cols_orderedEvents$col_order]
+			}
+			j = j + 1
+		}
+
+		# clustered$cluster[clustered$cluster == mat_withOrder[i,  cols_matFifty_v2$clus]] = minValForClus
+
+		print(paste("Cluster:", mat_withOrder[i,  cols_matFifty_v2$clus], " Order:", minValForClus))
+		# clustered$center[minValForClus, ] <- centers[mat_withOrder[i,  cols_matFifty_v2$clus], ]
+
+		i <- j
+	}
+
+	return (clustered)
+}
+
+
+
 
 
 excludeEvents <- function(mat_missingStats, list_distributions, mat_fiftyPoints, exclTh){
@@ -303,9 +362,11 @@ appendOrder <- function(mat_fiftyPoints, list_eventsOrder){
 
 	for (i in 1:length(list_eventsOrder)){
 		eventNum <- list_eventsOrder[[i]]
+
 		mat_withOrder[eventNum, cols_orderedEvents$col_order] = i
 	}
 
+	colnames(mat_withOrder)[cols_orderedEvents$col_order] = "order";
 	return(mat_withOrder)
 }
 

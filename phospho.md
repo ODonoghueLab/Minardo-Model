@@ -81,7 +81,7 @@ Order events (using mean or median) & plot.
 
 ```R
 
-theOrder <- calculateOrder(humphrey, clustered, mat_events, "wilcox")
+theOrder <- calculateOrder(humphrey.stand, clustered, mat_events, "wilcox")
 visualizeOrder(theOrder$mat_events_withOrder, theOrder$individEventOrder, theOrder$signifs, theOrder$test)
 
 ```
@@ -90,9 +90,27 @@ visualizeOrder(theOrder$mat_events_withOrder, theOrder$individEventOrder, theOrd
 
 
 ```R
+## orig
+glmTukeyForEachClus_orig <- calcClusterChng(humphrey.stand, clustered)
+glmTukeyForEachClus.summary_orig <- summaryGetZP(glmTukeyForEachClus_orig, humphrey.stand)
+timeRegions_orig <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus_orig, 9, phosZscoreTh=15, dephosZscoreTh=-15)
+mat_events_orig <- calcEvents(timeRegions_orig, clustered)
+theOrder_orig <- calculateOrder(humphrey.stand, clustered, mat_events_orig, "wilcox")
+visualizeOrder(theOrder_orig$mat_events_withOrder, theOrder_orig$individEventOrder, theOrder_orig$signifs, theOrder_orig$test)
 
-rearrangeClusters()
+rearranged <- rearrangeClusters(clustered, theOrder)
 
+
+# ordered
+# then simply recompute everything with the new ordering.
+glmTukeyForEachClus <- calcClusterChng(humphrey.stand, rearranged)
+glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, humphrey.stand)
+timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, phosZscoreTh=15, dephosZscoreTh=-15)
+mat_events <- calcEvents(timeRegions, rearranged)
+
+
+theOrder <- calculateOrder(humphrey.stand, rearranged, mat_events, "wilcox")
+visualizeOrder(theOrder$mat_events_withOrder, theOrder$individEventOrder, theOrder$signifs, theOrder$test)
 ```
 
 
