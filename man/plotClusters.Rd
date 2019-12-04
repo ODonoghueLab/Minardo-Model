@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotClusters.r
 \name{plotClusters}
 \alias{plotClusters}
-\title{Prints a plot of clusters using a monochromatic low opacity gray (gray50) colour.}
+\title{Cluster plots using a monochromatic low opacity gray colour.}
 \usage{
 plotClusters(Tc, clustered, plotNumCol = 5)
 }
@@ -11,7 +11,7 @@ plotClusters(Tc, clustered, plotNumCol = 5)
 
 \item{clustered}{A fclust object containing the clustering details}
 
-\item{plotNumCol}{Number of columns in the multi-cluster plot}
+\item{plotNumCol}{Number of cluster-plots to display within a given row.}
 }
 \value{
 None

@@ -49,11 +49,12 @@ Change within a cluster at the various time intervals can be quantified as follo
 glmTukeyForEachClus <- calcClusterChng(ge.stand, clustered)
 
 # Extract z-scores and p-values.
-glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, totalTimePoints=7)
+glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, ge.stand)
 
 ## Plot the z-scores as a heatmap.
 resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary)
 ```
+
 ![Heatmap](images/Ge/ge_heatmap.png)
 Fig. 2: Heatmap showing z-scores for each of the clusters (x-axis) at time-intervals (y-axis) with significant p-values. Z-scores at non-significant intervals are shown in grey.
 

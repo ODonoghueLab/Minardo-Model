@@ -1,8 +1,8 @@
 #' @title
-#' Order clusters
+#' Calculate changes at all intervals within each cluster
 #'
 #' @description
-#' Create and run generalised linear models and post-hoc tukey contrasts for each cluster.
+#' Create and run generalised linear models and post-hoc tukey contrasts at all time points for each cluster.
 #'
 #' @param Tc A matrix containing time course data.
 #' @param clustered A fclust object containing the clustering details.
@@ -15,7 +15,7 @@
 #' @importFrom methods is
 #'
 #'
-#' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles.
+#' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object.
 #'
 #' @export
 calcClusterChng <- function(Tc, clustered){
@@ -47,12 +47,12 @@ calcClusterChng <- function(Tc, clustered){
 }
 
 #' @title
-#' Summarize clusterChange and get z-scores and p-values.
+#' Summarize the Tukey constrasting results for consecutive intervals.
 #'
 #' @description
-#' Summarize results obtained by running the "calcClusterChng" function. Specifically this function extracts z-scores and p-values.
+#' Summarize results obtained by running the \code{calcClusterChng} function. Specifically this function extracts z-scores and p-values for consecutive intervals.
 #'
-#' @param list_resSummaries A list returned by the "calcClusterChng" function.
+#' @param list_resSummaries A list returned by the \code{calcClusterChng} function.
 #' @param Tc The time course data
 #'
 #' @return A list containing two items, where the first item is a z-score matrix, and the second item is a p-value matrix.
@@ -115,68 +115,7 @@ summaryGetZP <- function(list_resSummaries, Tc){
 }
 
 #' @title
-#' Summarize clusterChange and get z-scores and p-values.
-#'
-#' @description
-#' Summarize results obtained by running the "calcClusterChng" function. Specifically this function extracts z-scores and p-values.
-#'
-#' @param list_resSummaries A list returned by the "calcClusterChng" function.
-#' @param Tc The time course data
-#'
-#' @return A list containing two items, where the first item is a z-score matrix, and the second item is a p-value matrix.
-#'
-#' @importFrom methods is
-#'
-#' @seealso \code{\link{calcClusterChng}}
-#'
-#' @export
-summaryGetZP_scheffe <- function(list_resSummaries, Tc){
-
-	# stopifnot(is(list_resSummaries,"clusterChange"), is(Tc, "matrix"))
-
-
-	list_concTpSummary <- list()
-	colNames = c()
-
-	zScores <- matrix(nrow=length(list_resSummaries), ncol=ncol(Tc)-1)
-	pValues <- matrix(nrow=length(list_resSummaries), ncol=ncol(Tc)-1)
-
-
-
-	for(clustNum in 1:length(list_resSummaries)){
-		for(tp in 2:ncol(Tc)){
-
-			selName = paste((tp), "-", tp-1)
-			name = paste(colnames(Tc)[tp], "-", colnames(Tc)[tp-1])
-
-			print(selName)
-			if(clustNum == 1){
-				colNames <- c(colNames, name)
-			}
-
-			idx = which(glmTukeyForEachClus[[clustNum]]$contrasts[1] == selName )
-
-			zScores[clustNum, tp-1] <- as.numeric(list_resSummaries[[clustNum]]$contrasts[idx,]$z.ratio) * -1
-
-			pValues[clustNum, tp-1] <- list_resSummaries[[clustNum]]$contrasts[idx,]$p.value
-
-		}
-	}
-
-	print(colNames)
-	colnames(zScores) <- colNames
-	colnames(pValues) <- colNames
-
-	list_concTpSummary[[1]] <- zScores
-	list_concTpSummary[[2]] <- pValues
-
-	class(list_concTpSummary) <- "summary.clusterChange"
-
-	return(list_concTpSummary)
-}
-
-#' @title
-#' Print z-scores and p-values
+#' Print changes in consecutive contrasting intervals
 #'
 #' @description
 #' Prints two matrices, the first containing z-scores, and the second, p-values, where each row corresponds to each cluster, and each column corresponds to the time-interval.
@@ -203,7 +142,7 @@ printZP <- function(list_concTpSummary){
 #' @description
 #' Plot a heatmap of z-scores, masking the z-scores at insignificant p-values. Rows in the heatmap correspond to clusters, and columns in the heatmap correspond to time intervals.
 #'
-#' @param list_concTpSummary Z-scores and p-values extracted from tukey-constrasts for glm's of each cluster. Obtained by running the "summaryGetZP" function.
+#' @param list_concTpSummary Z-scores and p-values extracted from tukey-constrasts for glm's of each cluster. Obtained by running the \code{summaryGetZP} function.
 #' @param significanceTh P-value cutoff. This value ranges between 0 and 1. Generally, the threshold of p<0.5 is considered significant. This threshold can be reduced to, for example 0.01, 0.05 or 0.001, for only plotting the highly significant z-scores. To plot all z-scores, the treshold can be set to 1.
 #'
 #' @return Displays a plot and returns a matrix, with z-scores masked (NA) according to the signficance (p-value) threshold specified.
@@ -284,22 +223,6 @@ runGlmForEachCluster <- function(list_dfsGlm){
 }
 
 
-createGlmTukeyForEachClus <- function(list_dfsGlm){
-	list_lm <- list()
-	list_tukeys <- list()
-
-
-
-	for (clusNum in 1:length(list_dfsGlm)){
-		aGlm <- stats::glm(formula=experimentalObs ~ fac_profileNum + fac_timepoint, data=list_dfsGlm[[clusNum]]) # setting up the glm
-		list_tukeys[[clusNum]] <- summary(emmeans(aGlm, pairwise ~ fac_timepoint, adjust="tukey")) # running glm, and computing pairwise contrasts
-
-		# list_lm[[dfNum]] <- aGlm
-	}
-
-
-	return (list_tukeys)
-}
 #' Convert a list of matrices of each cluster, to a list of data frames (in the required glm format) for each cluster. Timepoint, and profileNum are factors, and experimentalObs (ratio) is y.
 #'
 #' @param list_matrices A list of matrices for each cluster
