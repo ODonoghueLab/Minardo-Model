@@ -26,7 +26,7 @@
 #' @export
 plotZP_withEvents <- function(list_concTpSummary, mat_events, significanceTh=0.05){
 
-	stopifnot( (significanceTh >0 && significanceTh <= 1), is(mat_events, "matrix"))
+	stopifnot(is(list_concTpSummary, "summary.clusterChange"), is(mat_events, "matrix"), (significanceTh >0 && significanceTh <= 1))
 
 	segs <- calcSegsOfCentroids(mat_events) # need to add to global, for graphics::segments to find.
 	assign("segs", segs, envir=.GlobalEnv)
@@ -128,7 +128,7 @@ getMidX <- function(x1, y1, x2, y2, y_50){
 #' @export
 calcEvents <- function(timeRegions, clustered, phosEventTh=0.5, dephosEventTh=0.5){
 
-	stopifnot(is(clustered, "fclust"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
+	stopifnot(is(timeRegions, "matrix"), is(clustered, "fclust"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
 
 	mat_fiftyPoints <- matrix(ncol=6) # cluster, time, abundance, dir, startTp, endTp
 
@@ -224,6 +224,10 @@ calcCrossing_v3 <- function(region, dir, offset, phosTh, dephosTh){
 #'
 #' @export
 missingStats <- function(Tc, clustered, mat_events, phosEventTh, dephosEventTh){
+
+	stopifnot(is(Tc, "matrix"), is(clustered, "fclust"), is(mat_events, "matrix"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
+
+
 	list_matrices <- splitIntoSubMatrices(Tc, clustered)
 
 	list_distributions <- getDistOfAllEvents_v2(mat_events, list_matrices, phosEventTh, dephosEventTh)
@@ -280,7 +284,7 @@ missingStats <- function(Tc, clustered, mat_events, phosEventTh, dephosEventTh){
 getTimeRegionsWithMaximalChange <- function(glmTukeyForEachClus, numTps, signifTh=0.05, phosZscoreTh=0, dephosZscoreTh=0){
 
 	# Add checks
-	stopifnot(is(glmTukeyForEachClus, "clusterChange"), numTps > 0, (signifTh > 0 && signifTh <= 1))
+	stopifnot(is(glmTukeyForEachClus, "clusterChange"), numTps > 0, (signifTh > 0 && signifTh <= 1), phosZscoreTh >= 0, dephosZscoreTh <= 0)
 
 	list_timeRegNoOvrlp <- list()
 

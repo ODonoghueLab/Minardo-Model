@@ -143,7 +143,7 @@ printZP <- function(list_concTpSummary){
 #' Plot a heatmap of z-scores, masking the z-scores at insignificant p-values. Rows in the heatmap correspond to clusters, and columns in the heatmap correspond to time intervals.
 #'
 #' @param list_concTpSummary Z-scores and p-values extracted from tukey-constrasts of consecutive time intervals for each cluster. Obtained by running the \code{summaryGetZP} function.
-#' @param significanceTh Tukey's p-value cutoff to be applied for significance. 
+#' @param significanceTh Tukey's p-value cutoff to be applied for significance.
 #'
 #' @return Displays a plot and returns a matrix, with z-scores masked (NA) according to the signficance (p-value) threshold specified.
 #'
@@ -156,6 +156,7 @@ printZP <- function(list_concTpSummary){
 #'
 #' @export
 plotZP <- function(list_concTpSummary, significanceTh=0.05){
+
 	stopifnot(is(list_concTpSummary, "summary.clusterChange"), (significanceTh >0 && significanceTh <= 1))
 
 	theSignifs <- list_concTpSummary[[2]] < significanceTh

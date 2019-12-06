@@ -31,15 +31,12 @@
 calculateOrder <- function(Tc, clustered, mat_events, test="wilcox", fdrSignif=0.05, phosEventTh=0.5, dephosEventTh=0.5){
 
 
-	stopifnot(is(Tc, "matrix"), is(clustered, "fclust"), is(mat_events, "matrix"))
+	stopifnot(is(Tc, "matrix"), is(clustered, "fclust"), is(mat_events, "matrix"), (fdrSignif >0 && fdrSignif <= 1 ), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
 
 	if (!(test == eventOrderTest$param) && !(test == eventOrderTest$nonParam)){
 		stop(paste("Test ", test, " not recognized.", sep=""))
 	}
 
-	if (fdrSignif < 0 || fdrSignif > 1){
-		stop(paste("fdrsignif value is out of range.", sep=""))
-	}
 
 
 	list_matrices <- splitIntoSubMatrices(Tc, clustered)
@@ -121,6 +118,9 @@ calculateOrder <- function(Tc, clustered, mat_events, test="wilcox", fdrSignif=0
 #' @export
 visualizeOrder <- function(theOrder){
 # Visualise the ordering of events
+
+	stopifnot(is(theOrder, "list"), length(theOrder) == 4)
+
 
 	mat_events_withOrder <- theOrder$mat_events_withOrder
 	list_eventsOrder <- theOrder$individEventOrder
@@ -296,6 +296,10 @@ visualizeOrder <- function(theOrder){
 #'
 #' @export
 rearrangeClusters <- function(clustered, theOrder){
+
+	stopifnot(is(clustered, "fclust"), is(theOrder, "list"), length(theOrder) == 4)
+
+
 	clusterOrder <- matrix(ncol=1, nrow=max(theOrder$mat_events_withOrder[,cols_matFifty_v2$clus]), data=NA) # the row numb stores the original order
 	# print(clusterOrder)
 	orderCounter = 1

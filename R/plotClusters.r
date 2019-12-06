@@ -21,7 +21,7 @@
 #' @export
 plotClusters <- function (Tc, clustered, plotNumCol=5){
 
-  stopifnot(is(clustered, "fclust"), is(Tc, "matrix"))
+  stopifnot(is(clustered, "fclust"), is(Tc, "matrix"), plotNumCol > 0)
 
 
   plotNumRow = ceiling(max(clustered$cluster)/plotNumCol)
@@ -79,7 +79,7 @@ plotClusters <- function (Tc, clustered, plotNumCol=5){
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object, \code{\link{calcEvents}}
 plotClusters_withEvents <- function (Tc, clustered, mat_events, plotNumCol=5){
 
-  stopifnot(is(clustered, "fclust"), is(Tc, "matrix"))
+  stopifnot(is(clustered, "fclust"), is(Tc, "matrix"), is(mat_events, "matrix"), plotNumCol > 0)
 
 
   plotNumRow = ceiling(max(clustered$cluster)/plotNumCol)

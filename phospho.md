@@ -67,7 +67,7 @@ In the example below however, 50% threshold is set for both a phosphorylation an
 
 ```R
 # Returns a list of matrices containing the computed time regions for each cluster.
-timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, phosZscoreTh=15, dephosZscoreTh=-15)
+timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 9, 0.05, phosZscoreTh=15, dephosZscoreTh=-15)
 
 
 # Returns a matrix containing event information, computed for the cluster centroids.  
