@@ -1,8 +1,8 @@
 #' @title
-#' Cluster plots using a monochromatic low opacity gray colour.
+#' Plot clusters using a monochromatic low opacity gray colour.
 #'
 #' @description
-#' Using this colour scheme enables you to clearly visualise the density of profiles within each cluster.
+#' Using this colour scheme enables the clear visualisation of the density of profiles within each cluster.
 #'
 #' @param Tc A matrix containing time course data.
 #' @param clustered A fclust object containing the clustering details
@@ -10,10 +10,15 @@
 #'
 #' @return None
 #'
-#' @export
 #'
 #' @importFrom graphics axis lines par plot
 #' @importFrom grDevices adjustcolor
+#' @importFrom methods is
+#'
+#'
+#' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object.
+#'
+#' @export
 plotClusters <- function (Tc, clustered, plotNumCol=5){
 
   stopifnot(is(clustered, "fclust"), is(Tc, "matrix"))
@@ -52,10 +57,10 @@ plotClusters <- function (Tc, clustered, plotNumCol=5){
 
 #### MAIN FUNCTION 3.
 #' @title
-#' Cluster plots using a monochromatic low opacity gray color, with events overlaid.
+#' Plots of clusters with events overlaid.
 #'
 #' @description
-#' Shown overlaid on the cluster plots are events computed for the cluster centroids. The increasing and decreasing events are shown using red and blue respectively.
+#' Shown overlaid on the cluster plots are events computed for the cluster centroids. The increasing and decreasing events are shown using red and blue, respectively.
 #'
 #' @param Tc A matrix containing time course data.
 #' @param clustered A fclust object containing the clustering details
@@ -68,6 +73,10 @@ plotClusters <- function (Tc, clustered, plotNumCol=5){
 #'
 #' @importFrom graphics axis lines par plot points
 #' @importFrom grDevices adjustcolor
+#' @importFrom methods is
+#'
+#'
+#' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object, \code{\link{calcEvents}}
 plotClusters_withEvents <- function (Tc, clustered, mat_events, plotNumCol=5){
 
   stopifnot(is(clustered, "fclust"), is(Tc, "matrix"))

@@ -10,11 +10,11 @@ visualizeOrder(theOrder)
 \item{theOrder}{A list containing information regarding the order of events and clusters generated via the \code{calculateOrder} function.}
 }
 \value{
-A figure containing the ordered clusters by occurance of first event is generated. Along with this, returned is a matrix, similar to the mat_fiftyPoints matrix, where an additional column is appended containing the order of occurance of the corresponding event.
+A plot containing the ordered clusters by occurance of first event is generated (see description).
 }
 \description{
-A plot containing the events order is generated. The order is shown using two visualizations, event maps (top) and event sparklines (bottom). The event sparkline is a summary of the event map.
+A plot depicting the temporal order of events is generated. The order is shown using two visualizations, event maps (top) and event sparklines (bottom). The event sparkline is a summary of the event map.
 }
 \seealso{
-\code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calc50crossing}} for identifying events.
+\code{\link{calculateOrder}}
 }

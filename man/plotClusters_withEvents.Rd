@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotClusters.r
 \name{plotClusters_withEvents}
 \alias{plotClusters_withEvents}
-\title{Cluster plots using a monochromatic low opacity gray color, with events overlaid.}
+\title{Plots of clusters with events overlaid.}
 \usage{
 plotClusters_withEvents(Tc, clustered, mat_events, plotNumCol = 5)
 }
@@ -19,5 +19,8 @@ plotClusters_withEvents(Tc, clustered, mat_events, plotNumCol = 5)
 None
 }
 \description{
-Shown overlaid on the cluster plots are events computed for the cluster centroids. The increasing and decreasing events are shown using red and blue respectively.
+Shown overlaid on the cluster plots are events computed for the cluster centroids. The increasing and decreasing events are shown using red and blue, respectively.
+}
+\seealso{
+\code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object, \code{\link{calcEvents}}
 }

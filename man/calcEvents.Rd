@@ -12,12 +12,12 @@ calcEvents(timeRegions, clustered, phosEventTh = 0.5,
 
 \item{clustered}{A fclust object containing the clustering details.}
 
-\item{phosEventTh}{Value between 0 and 1, to define the threshold at which a phosphorylation (or increasing) event occurs. Here, a threshold of 0 corresponds to the minimal value within an interval. An event identified in this way is designated as 1.}
+\item{phosEventTh}{Value between 0 and 1, to define the threshold at which a phosphorylation (or increasing) event occurs. Here, a threshold of 0 corresponds to the minimum value within an interval. (Such an event is designated as 1).}
 
-\item{dephosEventTh}{Value between 0 and 1, to define the threshold at which a dephosphorylation (or decreasing) event occurs. A threshold of 0 corresponds to the maximal value within an interval. An event identified in this way is designated as -1.}
+\item{dephosEventTh}{Value between 0 and 1, to define the threshold at which a dephosphorylation (or decreasing) event occurs. A threshold of 0 corresponds to the maximum value within an interval. (Such an event is designated as -1).}
 }
 \value{
-A matrix containing the calculated events details for the cluster centroids.
+A matrix containing the details of the calculated events for the cluster centroids (time region information is appended to the matrix).
 }
 \description{
 Calculate events for the cluster centroids.

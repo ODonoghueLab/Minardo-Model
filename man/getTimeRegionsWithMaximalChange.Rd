@@ -8,15 +8,15 @@ getTimeRegionsWithMaximalChange(glmTukeyForEachClus, numTps,
   signifTh = 0.05, phosZscoreTh = 0, dephosZscoreTh = 0)
 }
 \arguments{
-\item{glmTukeyForEachClus}{A list (with same length as number of clusters) containing the Tukey contrasts for all time points. Obtained by running the \code{calcClusterChng} function.}
+\item{glmTukeyForEachClus}{A list (with same length as number of clusters) containing the GLM post-hoc Tukey contrasts for all time points. Obtained by running the \code{calcClusterChng} function.}
 
 \item{numTps}{Total number of time points in the data.}
 
-\item{signifTh}{P-value cutoff of the tukey contrasts.}
+\item{signifTh}{P-value cutoff of the Tukey contrasts.}
 
-\item{phosZscoreTh}{A z-score value filter to remove phosphorylation (or increasing) events, such that all events >= phosZscoreTh are removed.}
+\item{phosZscoreTh}{A z-score value filter to remove phosphorylation (or increasing) events, such that all events with a z-score <= phosZscoreTh are removed.}
 
-\item{dephosZscoreTh}{A z-score value filter to remove dephosphorylation (or decreasing) events, such that all events >= dephosZscoreTh are removed.}
+\item{dephosZscoreTh}{A z-score value filter to remove dephosphorylation (or decreasing) events, such that all events with a z-score >= dephosZscoreTh are removed.}
 }
 \value{
 A List of matrices, one for each cluster, containing the time regions information. The columns in each matrix are cluster, zscore, start time point, end time point, and direction.

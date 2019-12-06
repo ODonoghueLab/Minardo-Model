@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotClusters.r
 \name{plotClusters}
 \alias{plotClusters}
-\title{Cluster plots using a monochromatic low opacity gray colour.}
+\title{Plot clusters using a monochromatic low opacity gray colour.}
 \usage{
 plotClusters(Tc, clustered, plotNumCol = 5)
 }
@@ -17,5 +17,8 @@ plotClusters(Tc, clustered, plotNumCol = 5)
 None
 }
 \description{
-Using this colour scheme enables you to clearly visualise the density of profiles within each cluster.
+Using this colour scheme enables the clear visualisation of the density of profiles within each cluster.
+}
+\seealso{
+\code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object.
 }
