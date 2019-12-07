@@ -59,11 +59,11 @@ resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary, significanceTh=0.001) #
 
 #### 4. Determine events
 
-To calculate events, the first step involves calculating time regions. Time regions are calculated from Tukey contrasts calculated in the previous step. They are non-overlapping intervals with the maximal change, such that change in subintervals must also be in the the direction of the maximal change. The time regions can be filtered by either the z-score or the p-value or both.
+To calculate events, the first step involves calculating time regions. Time regions are calculated from Tukey contrasts (previous step). They are non-overlapping intervals with the maximal change, such that change in subintervals must also be in the the direction of the maximal change. The time regions can be filtered by either the z-score or the p-value or both.
 
-It is within these time-regions that events are defined. The threshold can be set to any value between 0 (start of interval) and 1 (end of interval) and reflects on the users intuition or understanding of the system, such as what percent saturation must be attained for the involved phosphosites to contribution to the underlying mechanisms. For example, 30% phosphorylation of a site may be considered enough for the site's corresponding protein to affect downstream proteins.
+It is within these time-regions that events are defined. For each type of event (increasing or decreasing) an abundance threshold defined, at which the event occurs. The threshold can be set to any value between 0 (minimal abundance for an increasing event, and vice versa for decreasing event) and 1 (maxmimal abundance for an increasing event, and vice versa for decreasing event) and reflects on the users intuition or understanding of the system, such as what percent saturation must be attained for the involved phosphosites to contribution to the underlying mechanisms. For example, 30% phosphorylation of a site may be considered enough for the site's corresponding protein to affect downstream proteins.
 
-In the example below however, 50% threshold is set for both a phosphorylation and dephosphorylation event.
+In the example below however, for both phosphorylation and dephosphorylation, the events are defined at the 50% standardized abundance threshold.
 
 ```R
 # Returns a list of matrices containing the computed time regions for each cluster.
@@ -111,7 +111,7 @@ object, namely the `centers` and the `cluster`.
 rearranged <- rearrangeClusters(clustered, theOrder)
 ```
 
-Once rearranged,
+Once rearranged, regenerate the event map and event sparkline to see the clusters numbered by occurrence of their corresponding first event.
 
 ```R
 # Then, simply recompute everything with the new ordering, and clusters with the rearranged ordering can be visualized.
@@ -129,7 +129,7 @@ visualizeOrder(theOrder$mat_events_withOrder, theOrder$individEventOrder, theOrd
 ```
 
 
-References
+#### References
 
-1.
-2.
+1. Humphrey, S. J., Yang, G., Yang, P., Fazakerley, D. J., Stöckli, J., Yang, J. Y., & James, D. E. (2013). Dynamic adipocyte phosphoproteome reveals that Akt directly regulates mTORC2. Cell metabolism, 17(6), 1009-1020.
+2. Yang, P., Zheng, X., Jayaswal, V., Hu, G., Yang, J. Y. H., & Jothi, R. (2015). Knowledge-based analysis for detecting key signaling events from time-series phosphoproteomics data. PLoS computational biology, 11(8), e1004403.
