@@ -37,8 +37,8 @@ clustered <- cmeans(humphrey.stand, centers=17, iter.max=200, m=1.25)
 plotClusters(humphrey.stand, clustered) ## See Fig. 1
 ```
 
-![Mfuzz clustering](images/Ge/ge_clusters.png)
-Fig. 1: Clusters of gene expression dataset.  
+![Mfuzz clustering](images/Humphrey/humphrey_clusters.png)
+Fig. 1: Clusters of 3,172 phosphoproteomics profiles.  
 
 #### 3. Quantifying change within clusters
 
@@ -56,6 +56,10 @@ glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, humphrey.stand)
 # Returns heatmap plot and a matrix. The matrix contains z-scores for consecutive time points, where values above the significanceTh are set to NA
 resWithOnlySignif <- plotZP(glmTukeyForEachClus.summary, significanceTh=0.001) ## See Fig. 2
 ```
+
+![Mfuzz clustering](images/Humphrey/humphrey_heatmap.png)
+Fig. 2: Heatmap of z-scores.
+
 
 #### 4. Determine events
 
@@ -84,10 +88,16 @@ plotClusters_withEvents(humphrey.stand, clustered, mat_events) ## See Fig. 3.
 resWithOnlySignif <- plotZP_withEvents(glmTukeyForEachClus.summary, mat_events, 0.001) ## See Fig. 4.
 ```
 
+![Clusters with events](images/Humphrey/humphrey_clusters_events.png)
+Fig. 3: The 17 clusters with 24 events overlaid.
+
+![Clusters with events](images/Humphrey/humphrey_heatmap_events.png)
+Fig. 4: Heatmap of z-scores with events overlaid.
+
 
 
 #### 5. Order filtered(/unfiltered events).
-Order events (using mean or median) & plot.
+Order events (using mean (use `t-test`) or median (use `wilcox`)) & plot.
 
 ```R
 # Returned is an object containing information regarding the event and cluster order.
@@ -98,7 +108,11 @@ visualizeOrder(theOrder) ## See Fig. 5.
 
 ```
 
-#### 6. Rearrange clusters (requires ordering).
+![Clusters with events](images/Humphrey/humphrey_clusters_events.png)
+Fig. 5: Event map (top) and event sparkline (bottom) showing the temporal order of events and clusters.
+
+
+#### 6. Rearrange clusters
 
 Once the order is generated, the clusters can then be rearranged. For this purpose we make available the function `rearrangeCluster`. This function mainly rearranges only two attributes of the `fclust` `clustered`
 object, namely the `centers` and the `cluster`.
@@ -123,10 +137,13 @@ mat_events <- calcEvents(timeRegions, rearranged)
 
 
 theOrder <- calculateOrder(humphrey.stand, rearranged, mat_events, "wilcox")
-visualizeOrder(theOrder$mat_events_withOrder, theOrder$individEventOrder, theOrder$signifs, theOrder$test) ## See Fig. 6
+visualizeOrder(theOrder) ## See Fig. 6
 
 # Additionally, cluster plots and heatmap plots can also be generated.
 ```
+
+![Event map and event sparkline](images/Humphrey/humphrey_ordered_rearranged.png)
+Fig. 6: Rearranged clusters and events (to reflect on the order of occurance of events).
 
 
 #### References

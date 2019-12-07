@@ -128,7 +128,7 @@ getMidX <- function(x1, y1, x2, y2, y_50){
 #' @export
 calcEvents <- function(timeRegions, clustered, phosEventTh=0.5, dephosEventTh=0.5){
 
-	stopifnot(is(timeRegions, "matrix"), is(clustered, "fclust"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
+	stopifnot(is(timeRegions, "list"), is(clustered, "fclust"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
 
 	mat_fiftyPoints <- matrix(ncol=6) # cluster, time, abundance, dir, startTp, endTp
 
