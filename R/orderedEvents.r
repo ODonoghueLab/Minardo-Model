@@ -601,9 +601,10 @@ isComparisonPossible <- function(list1, list2){
 
 	# print(list1)
 
-	if(all(abs(list1 - mean(list1)) < 0.00001) && all(abs(list2 - mean(list2)) < 0.00001) && abs(mean(list1) - mean(list2)) < 0.00001) {
-		return (FALSE)
+	if(all(abs(list1 - mean(list1)) < 0.0001) && all(abs(list2 - mean(list2)) < 0.0001) && abs(mean(list1) - mean(list2)) < 0.0001) {
 		# print("false!!!)")
+		return (FALSE)
+
 	}
 
 
@@ -626,6 +627,11 @@ performWilcoxonSignedRankTabular <- function(list_distributions){
 				}
 				else{ # do the comparison
 					res <- stats::wilcox.test(list_distributions[[i]][,cols_matFifty$col_x], list_distributions[[j]][,cols_matFifty$col_x], paired=FALSE, conf.int=TRUE)
+
+					# if (stats::wilcox.test(list_distributions[[i]][,cols_matFifty$col_x], list_distributions[[j]][,cols_matFifty$col_x], paired=FALSE, conf.int=TRUE)){
+					#	print(paste("The case here ", i, j))
+
+					#}
 					# return (res)
 					# print (res)
 					mat_pVal[i, j] <- res$p.value

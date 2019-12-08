@@ -133,16 +133,18 @@ calcEvents <- function(timeRegions, clustered, phosEventTh=0.5, dephosEventTh=0.
 	mat_fiftyPoints <- matrix(ncol=6) # cluster, time, abundance, dir, startTp, endTp
 
 	for (clusNum in 1:nrow(clustered$center)){
-		for (i in 1:nrow(timeRegions[[clusNum]])){
-			startTp = as.integer(min(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
-			endTp = as.integer(max(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
+		if (nrow(timeRegions[[clusNum]]) > 0){
+			for (i in 1:nrow(timeRegions[[clusNum]])){
+				startTp = as.integer(min(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
+				endTp = as.integer(max(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
 
-			crossPt <- calcCrossing_v3(clustered$center[clusNum, startTp:endTp], timeRegions[[clusNum]][i, cols_timeReg$dir], (startTp -1), phosEventTh, dephosEventTh)
+				crossPt <- calcCrossing_v3(clustered$center[clusNum, startTp:endTp], timeRegions[[clusNum]][i, cols_timeReg$dir], (startTp -1), phosEventTh, dephosEventTh)
 
-			# if (crossPt[1] == -1){
-				# print(clustered$center[clusNum, startTp:endTp])
-			# }
-			mat_fiftyPoints <- addToMatrixWithRegionInfo(mat_fiftyPoints, clusNum, crossPt[1], crossPt[2], timeRegions[[clusNum]][i, cols_timeReg$dir], startTp, endTp)
+				# if (crossPt[1] == -1){
+					# print(clustered$center[clusNum, startTp:endTp])
+				# }
+				mat_fiftyPoints <- addToMatrixWithRegionInfo(mat_fiftyPoints, clusNum, crossPt[1], crossPt[2], timeRegions[[clusNum]][i, cols_timeReg$dir], startTp, endTp)
+			}
 		}
 	}
 
@@ -293,17 +295,24 @@ getTimeRegionsWithMaximalChange <- function(glmTukeyForEachClus, numTps, signifT
 		# convert z-scores to matrix (by time * time)
 		combined <- convertToMatAndAddNAs(glmTukeyForEachClus[[i]], numTps, signifTh)
 
-
 		# Convert regions to 0 which cannot statisfy zscoreTh.
 		combined <- filterByZscore(combined, phosZscoreTh, dephosZscoreTh)
 
+		# print(combined)
 		# find time regions
 		timeRegions <- findMonotonicRegions(combined, i)
 
-		timeRegions_noOverlaps<- removeAnyOverlaps(timeRegions)
+		if (nrow(timeRegions) == 0){ # no time regions here.
+			# print('yes recognized, can skip')
+			list_timeRegNoOvrlp[[i]] <- timeRegions
+		}
+		else{
+			timeRegions_noOverlaps<- removeAnyOverlaps(timeRegions)
+			list_timeRegNoOvrlp[[i]] <- timeRegions_noOverlaps
+		}
 
 
-		list_timeRegNoOvrlp[[i]] <- timeRegions_noOverlaps
+
 	}
 
 
@@ -318,7 +327,7 @@ filterByZscore <- function(combined, phosZscoreTh, dephosZscoreTh){
 	for (rowNum in 1:nrow(combined)){
 		for (colNum in 1:ncol(combined)){
 
-			if (!is.na(combined[rowNum, colNum]) && combined[rowNum, colNum] > 0 &&combined[rowNum, colNum] < phosZscoreTh){
+			if (!is.na(combined[rowNum, colNum]) && combined[rowNum, colNum] > 0 && combined[rowNum, colNum] < phosZscoreTh){
 				combined[rowNum, colNum] <- 0
 
 			}
@@ -361,6 +370,7 @@ isAnyOverlap <- function(noOverlaps, currTp1, currTp2){
 }
 
 removeAnyOverlaps <- function(timeRegions){
+
 	noOverlaps_phos <- matrix(ncol=5)
 	noOverlaps_dephos <- matrix(ncol=5)
 	isFirstAdded_phos <- FALSE
@@ -508,13 +518,13 @@ findMonotonicRegions <- function(combined, cluster){
 
 
 	}
-	if (combined[rowEnd, colEnd] != 0){
+
+
+	if ( rowEnd > 0 && colEnd > 0 && rowEnd <= nrow(combined) && colEnd <= ncol(combined) && combined[rowEnd, colEnd] != 0) {
 		timeRegions <- addToTimeRegionsMat(timeRegions, cluster, combined[rowEnd, colEnd], rowEnd, colEnd, direction)
 
 		# print(paste(rowStart, colStart, rowEnd+1, colEnd, combined[rowEnd, colEnd]))
 	}
-
-
 
 
 	timeRegions <- timeRegions[-1,, drop=FALSE]
