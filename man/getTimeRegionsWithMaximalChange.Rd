@@ -4,8 +4,13 @@
 \alias{getTimeRegionsWithMaximalChange}
 \title{Calculate time regions}
 \usage{
-getTimeRegionsWithMaximalChange(glmTukeyForEachClus, numTps,
-  signifTh = 0.05, phosZscoreTh = 0, dephosZscoreTh = 0)
+getTimeRegionsWithMaximalChange(
+  glmTukeyForEachClus,
+  numTps,
+  signifTh = 0.05,
+  phosZscoreTh = 0,
+  dephosZscoreTh = 0
+)
 }
 \arguments{
 \item{glmTukeyForEachClus}{A list (with same length as number of clusters) containing the GLM post-hoc Tukey contrasts for all time points. Obtained by running the \code{calcClusterChng} function.}

@@ -43,7 +43,7 @@ plotClusters <- function (Tc, clustered, plotNumCol=5){
 
     for (j in 1:nrow(profilesInClus)){
         # idx = profMemberships.sorted$ix[j]
-
+		# print(profMemberships[j])
         graphics::lines(profilesInClus[j,], col=grDevices::adjustcolor("gray50", alpha.f=0.2))
     }
 

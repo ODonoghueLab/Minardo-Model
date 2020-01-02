@@ -318,12 +318,15 @@ rearrangeClusters <- function(clustered, theOrder){
 		}
 	}
 	# return(clusterOrder)
+
 	clusters = clustered$cluster
 	centers = rlang::duplicate(clustered$centers)
 	for (origOrder in 1:nrow(clusterOrder)){
-		# print(paste(origOrder, clusterOrder[origOrder,1]))
-		clustered$cluster[clusters == origOrder] = clusterOrder[origOrder,1]
-		clustered$center[clusterOrder[origOrder,1], ] = centers[origOrder,]
+		if (!is.na(clusterOrder[origOrder,1])){
+			# print(paste(origOrder, clusterOrder[origOrder,1]))
+			clustered$cluster[clusters == origOrder] = clusterOrder[origOrder,1]
+			clustered$center[clusterOrder[origOrder,1], ] = centers[origOrder,]
+		}
 	}
 	return (clustered)
 }

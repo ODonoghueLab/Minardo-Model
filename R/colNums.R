@@ -12,6 +12,8 @@ cols_timeReg <- list(cluster=1, zScore=2, tpStart=3, tpEnd=4, dir=5)
 colors_orderedEvents = list(incr = "#e6aeae", decr=rgb(0,0,0,alpha=0)) # incr color #F78A72
 #
 color_events = list(up="#ea3424", down="#C99999")
+color_eventDist = list(up=rgb(1, 0, 0, 0.5), down=rgb(0, 0, 1, 0.5))
+
 # colors_orderedEvents <- vector(mode="list", length=3)
 # names(colors_orderedEvents) <- c("incr", "decr")
 # colors_orderedEvents[[1]] <- "#989898" # incr - dark gray

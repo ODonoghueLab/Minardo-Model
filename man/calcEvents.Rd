@@ -4,8 +4,7 @@
 \alias{calcEvents}
 \title{Calculate events for the cluster centroids.}
 \usage{
-calcEvents(timeRegions, clustered, phosEventTh = 0.5,
-  dephosEventTh = 0.5)
+calcEvents(timeRegions, clustered, phosEventTh = 0.5, dephosEventTh = 0.5)
 }
 \arguments{
 \item{timeRegions}{A list containing the time regions information.}

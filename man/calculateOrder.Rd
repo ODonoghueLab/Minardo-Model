@@ -4,8 +4,15 @@
 \alias{calculateOrder}
 \title{Calculate the ordering of events}
 \usage{
-calculateOrder(Tc, clustered, mat_events, test = "wilcox",
-  fdrSignif = 0.05, phosEventTh = 0.5, dephosEventTh = 0.5)
+calculateOrder(
+  Tc,
+  clustered,
+  mat_events,
+  test = "wilcox",
+  fdrSignif = 0.05,
+  phosEventTh = 0.5,
+  dephosEventTh = 0.5
+)
 }
 \arguments{
 \item{Tc}{A matrix containing time course data.}
