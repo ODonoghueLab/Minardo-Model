@@ -117,7 +117,7 @@ visualizeOrder(theOrder) ## See Fig. 5.
 
 ```
 
-![Clusters with events](images/Humphrey/humphrey_clusters_events.png)
+![Clusters with events](images/Humphrey/humphrey_ordered.png)
 Fig. 5: Event map (top) and event sparkline (bottom) showing the temporal order of events and clusters.
 
 
