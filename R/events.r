@@ -126,19 +126,24 @@ getMidX <- function(x1, y1, x2, y2, y_50){
 #' @seealso \code{\link{getTimeRegionsWithMaximalChange}} to generate \code{timeRegions}, \code{\link[e1071]{cmeans}} to generate \code{clustered}
 #'
 #' @export
-calcEvents <- function(timeRegions, clustered, phosEventTh=0.5, dephosEventTh=0.5){
+calcEvents <- function(timeRegions, clusters, Tc, centroids=NA, phosEventTh=0.5, dephosEventTh=0.5){
 
-	stopifnot(is(timeRegions, "list"), is(clustered, "fclust"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
+	stopifnot(is(timeRegions, "list"), (length(clusters) == nrow(Tc)), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1), ( (!is.na(centroids)) || (is.na(centroids) && !is.na(Tc))) )
 
 	mat_fiftyPoints <- matrix(ncol=6) # cluster, time, abundance, dir, startTp, endTp
 
-	for (clusNum in 1:nrow(clustered$center)){
+	if (is.na(centroids)){
+		centroids = calcAvgOfClusProf(Tc, clusters)
+	}
+
+	# centroids = calcAvgOfClusProf()
+	for (clusNum in 1:max(clusters)){
 		if (nrow(timeRegions[[clusNum]]) > 0){
 			for (i in 1:nrow(timeRegions[[clusNum]])){
 				startTp = as.integer(min(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
 				endTp = as.integer(max(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
 
-				crossPt <- calcCrossing_v3(clustered$center[clusNum, startTp:endTp], timeRegions[[clusNum]][i, cols_timeReg$dir], (startTp -1), phosEventTh, dephosEventTh)
+				crossPt <- calcCrossing_v3(centroids[clusNum, startTp:endTp], timeRegions[[clusNum]][i, cols_timeReg$dir], (startTp -1), phosEventTh, dephosEventTh)
 
 				# if (crossPt[1] == -1){
 					# print(clustered$center[clusNum, startTp:endTp])
@@ -225,12 +230,12 @@ calcCrossing_v3 <- function(region, dir, offset, phosTh, dephosTh){
 #' @seealso \code{\link{getTimeRegionsWithMaximalChange}}, \code{\link[e1071]{cmeans}}, \code{\link{calcEvents}}
 #'
 #' @export
-missingStats <- function(Tc, clustered, mat_events, phosEventTh, dephosEventTh){
+missingStats <- function(Tc, clusters, mat_events, phosEventTh, dephosEventTh){
 
-	stopifnot(is(Tc, "matrix"), is(clustered, "fclust"), is(mat_events, "matrix"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
+	stopifnot(is(Tc, "matrix"), (length(clusters) == nrow(Tc)), is(mat_events, "matrix"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
 
 
-	list_matrices <- splitIntoSubMatrices(Tc, clustered)
+	list_matrices <- splitIntoSubMatrices(Tc, clusters)
 
 	list_distributions <- getDistOfAllEvents_v2(mat_events, list_matrices, phosEventTh, dephosEventTh)
 

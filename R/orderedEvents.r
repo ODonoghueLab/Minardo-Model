@@ -28,10 +28,10 @@
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calcEvents}} for identifying events.
 #'
 #' @export
-calculateOrder <- function(Tc, clustered, mat_events, test="wilcox", fdrSignif=0.05, phosEventTh=0.5, dephosEventTh=0.5){
+calculateOrder <- function(Tc, clusters, mat_events, test="wilcox", fdrSignif=0.05, phosEventTh=0.5, dephosEventTh=0.5){
 
 
-	stopifnot(is(Tc, "matrix"), is(clustered, "fclust"), is(mat_events, "matrix"), (fdrSignif >0 && fdrSignif <= 1 ), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
+	stopifnot(is(Tc, "matrix"),  (length(clusters) == nrow(Tc)), is(mat_events, "matrix"), (fdrSignif >0 && fdrSignif <= 1 ), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
 
 	if (!(test == eventOrderTest$param) && !(test == eventOrderTest$nonParam)){
 		stop(paste("Test ", test, " not recognized.", sep=""))
@@ -39,7 +39,7 @@ calculateOrder <- function(Tc, clustered, mat_events, test="wilcox", fdrSignif=0
 
 
 
-	list_matrices <- splitIntoSubMatrices(Tc, clustered)
+	list_matrices <- splitIntoSubMatrices(Tc, clusters)
 
 	list_distributions <- getDistOfAllEvents_v2(mat_events, list_matrices, phosEventTh, dephosEventTh)
 
@@ -295,9 +295,9 @@ visualizeOrder <- function(theOrder){
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calculateOrder}} to generate the order.
 #'
 #' @export
-rearrangeClusters <- function(clustered, theOrder){
+rearrangeClusters <- function(clusters, theOrder){
 
-	stopifnot(is(clustered, "fclust"), is(theOrder, "list"), length(theOrder) == 4)
+	stopifnot(is(theOrder, "list"), length(theOrder) == 4)
 
 
 	clusterOrder <- matrix(ncol=1, nrow=max(theOrder$mat_events_withOrder[,cols_matFifty_v2$clus]), data=NA) # the row numb stores the original order
@@ -319,16 +319,16 @@ rearrangeClusters <- function(clustered, theOrder){
 	}
 	# return(clusterOrder)
 
-	clusters = clustered$cluster
-	centers = rlang::duplicate(clustered$centers)
+	origClusters = clusters
+	# centers = rlang::duplicate(clustered$centers)
 	for (origOrder in 1:nrow(clusterOrder)){
 		if (!is.na(clusterOrder[origOrder,1])){
 			# print(paste(origOrder, clusterOrder[origOrder,1]))
-			clustered$cluster[clusters == origOrder] = clusterOrder[origOrder,1]
-			clustered$center[clusterOrder[origOrder,1], ] = centers[origOrder,]
+			clusters[origClusters == origOrder] = clusterOrder[origOrder,1]
+			# clustered$center[clusterOrder[origOrder,1], ] = centers[origOrder,]
 		}
 	}
-	return (clustered)
+	return (clusters)
 }
 
 

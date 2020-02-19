@@ -5,7 +5,8 @@
 #' Using this colour scheme enables the clear visualisation of the density of profiles within each cluster.
 #'
 #' @param Tc A matrix containing time course data.
-#' @param clustered A fclust object containing the clustering details
+#' @param clusters A vector with same length as number of profiles. The labels are assumed to be numbers, starting from 1.
+#' @param centroids A matrix containing centroids. If no matrix is provided, the centroid is then a simple average of all the profiles within the cluster. Alternatively, for example, centroids from FCM clustering can be provided which there profiles are weighted by the membership score.
 #' @param plotNumCol Number of cluster-plots to display within a given row.
 #'
 #' @return None
@@ -19,38 +20,48 @@
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object.
 #'
 #' @export
-plotClusters <- function (Tc, clustered, plotNumCol=5){
+plotClusters <- function (Tc, clusters, centroids=NA, plotNumCol=5){
 
-  stopifnot(is(clustered, "fclust"), is(Tc, "matrix"), plotNumCol > 0)
-
-
-  plotNumRow = ceiling(max(clustered$cluster)/plotNumCol)
-  graphics::par(mfrow=c(plotNumRow,plotNumCol))
+	stopifnot(is(Tc, "matrix"), plotNumCol > 0, (length(clusters) == nrow(Tc)))
 
 
-  allProfMemberships = as.matrix(apply(clustered$membership, 1, max)) # Getting each of the profile's best cluster num.
+	if (is.na(centroids)){
+		centroids <- calcAvgOfClusProf(Tc, clusters)
+	}
 
 
-  for(clusNum in c(1:max(clustered$cluster))){
+	plotNumRow = ceiling(max(clusters)/plotNumCol)
+	graphics::par(mfrow=c(plotNumRow,plotNumCol))
 
-    profilesInClus <- Tc[clustered$cluster == clusNum,]
-    profMemberships <- as.matrix(allProfMemberships[clustered$cluster == clusNum,])
 
-    # profMemberships.sorted <- sort(profMemberships, index=TRUE)
-	# print(colnames(Tc))
-    graphics::plot(NA, xlim=c(1,ncol(Tc)), xaxt="n", ylim=c(min(Tc)-0.2, max(Tc)+0.2), xlab="Timepoints", ylab="Standardised profiles",  main = paste("Cluster ", toString(clusNum), "; size=", nrow(profilesInClus), sep=""))
-	graphics::axis(side=1, at=c(1:ncol(Tc)), labels=colnames(Tc))
 
-    for (j in 1:nrow(profilesInClus)){
-        # idx = profMemberships.sorted$ix[j]
-		# print(profMemberships[j])
-        graphics::lines(profilesInClus[j,], col=grDevices::adjustcolor("gray50", alpha.f=0.2))
-    }
+	for(clusNum in c(1:max(clusters))){
 
-    graphics::lines(clustered$center[clusNum,], col="black", lwd=1.5)
+		profilesInClus <- Tc[clusters == clusNum,]
 
-  }
 
+		graphics::plot(NA, xlim=c(1,ncol(Tc)), xaxt="n", ylim=c(min(Tc)-0.2, max(Tc)+0.2), xlab="Timepoints", ylab="Standardised profiles",  main = paste("Cluster ", toString(clusNum), "; size=", nrow(profilesInClus), sep=""))
+		graphics::axis(side=1, at=c(1:ncol(Tc)), labels=colnames(Tc))
+
+		for (j in 1:nrow(profilesInClus)){
+			graphics::lines(profilesInClus[j,], col=grDevices::adjustcolor("gray50", alpha.f=0.2))
+		}
+
+		graphics::lines(centroids[clusNum,], col="black", lwd=1.5)
+
+	}
+
+}
+
+calcAvgOfClusProf <- function(Tc, clusters){
+	centroids = matrix(ncol=ncol(Tc), nrow=max(clusters))
+
+	for (clusNum in c(1:max(clusters))){
+		profilesInClus <- Tc[clusters == clusNum,]
+		centroids[clusNum,] <- colMeans(profilesInClus)
+	}
+
+	return(centroids)
 }
 
 
@@ -77,22 +88,25 @@ plotClusters <- function (Tc, clustered, plotNumCol=5){
 #'
 #'
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object, \code{\link{calcEvents}}
-plotClusters_withEvents <- function (Tc, clustered, mat_events, plotNumCol=5){
+plotClusters_withEvents <- function (Tc, clusters, mat_events, plotNumCol=5, centroids=NA){
 
-  stopifnot(is(clustered, "fclust"), is(Tc, "matrix"), is(mat_events, "matrix"), plotNumCol > 0)
+  stopifnot((length(clusters) == nrow(Tc)), is(Tc, "matrix"), is(mat_events, "matrix"), plotNumCol > 0)
 
 
-  plotNumRow = ceiling(max(clustered$cluster)/plotNumCol)
+  plotNumRow = ceiling(max(clusters)/plotNumCol)
   graphics::par(mfrow=c(plotNumRow,plotNumCol))
 
 
-  allProfMemberships = as.matrix(apply(clustered$membership, 1, max)) # Getting each of the profile's best cluster num.
+  # allProfMemberships = as.matrix(apply(clustered$membership, 1, max)) # Getting each of the profile's best cluster num.
 
+  if (is.na(centroids)){
+	  centroids = calcAvgOfClusProf(Tc, clusters)
+  }
 
-  for(clusNum in c(1:max(clustered$cluster))){
+  for(clusNum in c(1:max(clusters))){
 
-    profilesInClus <- Tc[clustered$cluster == clusNum,]
-    profMemberships <- as.matrix(allProfMemberships[clustered$cluster == clusNum,])
+    profilesInClus <- Tc[clusters == clusNum,]
+    # profMemberships <- as.matrix(allProfMemberships[clustered$cluster == clusNum,])
 
 
     graphics::plot(NA, xlim=c(1,ncol(Tc)), xaxt="n", ylim=c(min(Tc)-0.2, max(Tc)+0.2), xlab="Timepoints", ylab="Standardised profiles",  main = paste("Cluster ", toString(clusNum), "; size=", nrow(profilesInClus), sep=""))
@@ -103,7 +117,7 @@ plotClusters_withEvents <- function (Tc, clustered, mat_events, plotNumCol=5){
         graphics::lines(profilesInClus[j,], col=grDevices::adjustcolor("gray50", alpha.f=0.2))
     }
 
-    graphics::lines(clustered$center[clusNum,], col="black", lwd=1.5)
+    graphics::lines(centroids[clusNum,], col="black", lwd=1.5)
 
 	isYEncountered = FALSE
 

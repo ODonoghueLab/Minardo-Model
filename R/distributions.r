@@ -23,11 +23,13 @@
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles.
 #'
 #' @export
-clusTpDistributions <- function(Tc, clustered, outfile="tpDist.pdf",pdfHeight=40, pdfWidth=50, bandwidth=0.25){
+clusTpDistributions <- function(Tc, clusters, outfile="tpDist.pdf",pdfHeight=40, pdfWidth=50, bandwidth=0.25){
 
-	stopifnot(is(Tc, "matrix"), is(clustered, "fclust"))
+	stopifnot(is(Tc, "matrix"), (length(clusters) == nrow(Tc)))
 
-	list_matricies <- splitIntoSubMatrices(Tc, clustered)
+	list_matricies <- splitIntoSubMatrices(Tc, clusters)
+
+	# return(list_matricies);
 
 	pdf(outfile, height=pdfHeight, width=pdfWidth)
 	par(mfrow = c(length(list_matricies), ncol(Tc)))
@@ -83,8 +85,11 @@ clusTpDistributions <- function(Tc, clustered, outfile="tpDist.pdf",pdfHeight=40
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calcEvents}} for identifying events.
 #'
 #' @export
-eventDistributions <- function(Tc, clustered, mat_events, phosEventTh, dephosEventTh, outfile="eventDistributions.pdf", pdfHeight=35, pdfWidth=10, bandwidth=0.25) {
-	list_matricies <- splitIntoSubMatrices(Tc, clustered)
+eventDistributions <- function(Tc, clusters, mat_events, phosEventTh, dephosEventTh, outfile="eventDistributions.pdf", pdfHeight=35, pdfWidth=10, bandwidth=0.25) {
+
+	stopifnot(is(Tc, "matrix"), (length(clusters) == nrow(Tc)), is(mat_events, "matrix"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
+
+	list_matricies <- splitIntoSubMatrices(Tc, clusters)
 
 	list_distributions <- getDistOfAllEvents_v2(mat_events, list_matricies, phosEventTh, dephosEventTh)
 

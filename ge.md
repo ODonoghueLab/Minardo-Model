@@ -33,10 +33,10 @@ We utilize the `cmeans` function made available by the Mfuzz package to partitio
 ```R
 library(Mfuzz)
 
-clustered <- cmeans(ge.stand, centers=20,  iter.max=500, m=1.25) # paper, 2014 Ma et al. partions into 20 clusters.
+mfuzzObj <- cmeans(ge.stand, centers=20,  iter.max=1000, m=1.25) # paper, 2014 Ma et al. partions into 20 clusters.
 
 # Plotting the clusters
-plotClusters(ge.stand, clustered)
+plotClusters(ge.stand, mfuzzObj$cluster)
 ```
 
 ![Mfuzz clustering](images/Ge/ge_clusters.png)
@@ -50,10 +50,10 @@ To quantify which intervals are significantly changing and in which direction, r
 
 ```R
 # Generate a pdf containing the distributions of standandardized abundances at each time point for each cluster. Each distribution should be approximately normally distributed.
-clusTpDistributions(ge.stand, clustered, outfile="ge_tpDist.pdf") # See example file: images/Ge/ge_tpDist.pdf).
+clusTpDistributions(ge.stand, mfuzzObj$cluster, outfile="ge_tpDist.pdf") # See example file: images/Ge/ge_tpDist.pdf).
 
 # For each cluster, a linear model is formulated (where standardized ratio is the response) and time points along with profiles are predictors; the results of the post hoc tukey contrasting timepoints are presented.
-glmTukeyForEachClus <- calcClusterChng(ge.stand, clustered)
+glmTukeyForEachClus <- calcClusterChng(ge.stand, mfuzzObj$cluster)
 
 # Summarizes and returns two matrices containing post hoc tukey z-scores and p-values for consecutive time intervals.
 glmTukeyForEachClus.summary <- summaryGetZP(glmTukeyForEachClus, ge.stand)
@@ -81,14 +81,14 @@ timeRegions <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus, 7, 0.05, pho
 
 
 # Returns a matrix containing event information, computed for the cluster centroids.  
-mat_events <- calcEvents(timeRegions, clustered)
+mat_events <- calcEvents(timeRegions, mfuzzObj$cluster, ge.stand)
 
 
 # Running the function below is optional, its results may assist in updating thresholds to exclude/include events; It returns a matrix containing the number and percentage of profiles which get removed from an event's distribution because these profiles may not follow the general 'differences in means' direction.
-mat_missingStats <- missingStats(ge.stand, clustered, mat_events, 0.5, 0.5)
+mat_missingStats <- missingStats(ge.stand, mfuzzObj$cluster, mat_events, 0.5, 0.5)
 
  # Plot clusters with events overlaid (the events are computed for the cluster centroids).
-plotClusters_withEvents(ge.stand, clustered, mat_events) ## See Fig. 3.
+plotClusters_withEvents(ge.stand, mfuzzObj$cluster, mat_events) ## See Fig. 3.
 
 # Produces a heatmap with events marked, and returns a matrix (similar to the `plotZP` function).
 resWithOnlySignif <- plotZP_withEvents(glmTukeyForEachClus.summary, mat_events, 0.001) ## See Fig. 4.
@@ -105,10 +105,10 @@ Order events (using mean (use `t-test`) or median (use `wilcox`)) & plot. To det
 
 ```R
 # Plots distributions of event times for events in each cluster
-eventDistributions(ge.stand, clustered, mat_events, 0.5, 0.5, outfile="ge_eventDist.pdf"); # See file: images/Ge/ge_eventDist.pdf
+eventDistributions(ge.stand, mfuzzObj$cluster, mat_events, 0.5, 0.5, outfile="ge_eventDist.pdf"); # See file: images/Ge/ge_eventDist.pdf
 
 # Returned is an object containing information regarding the event and cluster order.
-theOrder <- calculateOrder(ge.stand, clustered, mat_events, "wilcox")
+theOrder <- calculateOrder(ge.stand, mfuzzObj$cluster, mat_events, "wilcox")
 
 #The order is can then be plotted using event map and event sparkline.
 visualizeOrder(theOrder) ## See Fig. 5.
@@ -130,21 +130,21 @@ object, namely the `centers` and the `cluster`.
 ```R
 
 # Returns the clustered object but with centers and cluster rearranged.
-rearranged <- rearrangeClusters(clustered, theOrder)
+clustersRearranged <- rearrangeClusters(mfuzzObj$cluster, theOrder)
 ```
 
 Once rearranged, regenerate the event map and event sparkline to see the clusters numbered by occurrence of their corresponding first event.
 
 ```R
 # Then, simply recompute everything with the new ordering, and clusters with the rearranged ordering can be visualized.
-glmTukeyForEachClus.rearranged <- calcClusterChng(ge.stand, rearranged)
+glmTukeyForEachClus.rearranged <- calcClusterChng(ge.stand, clustersRearranged)
 glmTukeyForEachClus.summary.rearranged <- summaryGetZP(glmTukeyForEachClus.rearranged, ge.stand)
 
 timeRegions.rearranged <- getTimeRegionsWithMaximalChange(glmTukeyForEachClus.rearranged, 7, phosZscoreTh=15, dephosZscoreTh=-15)
-mat_events.rearranged <- calcEvents(timeRegions.rearranged, rearranged)
+mat_events.rearranged <- calcEvents(timeRegions.rearranged, clustersRearranged, ge.stand)
 
 
-theOrder.rearranged <- calculateOrder(ge.stand, rearranged, mat_events.rearranged, "wilcox")
+theOrder.rearranged <- calculateOrder(ge.stand, clustersRearranged, mat_events.rearranged, "wilcox")
 visualizeOrder(theOrder.rearranged) ## See Fig. 6
 
 # Additionally, cluster plots and heatmap plots can also be generated.
@@ -160,7 +160,7 @@ As a side note, generated images can be saved as pdf and the width and height ad
 
 ```R
 pdf("ge_dups_wilcox.pdf", width = 16, height=4)
-plotClusters(ge.stand, clustered)
+plotClusters(ge.stand, mfuzzObj$cluster)
 dev.off()
 ```
 

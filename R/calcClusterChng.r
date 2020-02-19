@@ -18,7 +18,7 @@
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object.
 #'
 #' @export
-calcClusterChng <- function(Tc, clustered){
+calcClusterChng <- function(Tc, clusters){
 
 
 	# 1. split into matrix for each cluster...
@@ -27,9 +27,9 @@ calcClusterChng <- function(Tc, clustered){
 	# 4. for each glm result run tukey contrast. (which can give the summary directly or which can initially give the full matrix (between each time point))
 	# another function to do the plotting.
 
-	stopifnot(is(clustered, "fclust"), is(Tc, "matrix"))
+	stopifnot(is(Tc, "matrix"), (length(clusters) == nrow(Tc)))
 
-	list_matrices <- splitIntoSubMatrices(Tc, clustered)
+	list_matrices <- splitIntoSubMatrices(Tc, clusters)
 	list_dfsGlm <- convertMatToDfForGlmFormat(list_matrices)
 
 	list_lm <- runGlmForEachCluster(list_dfsGlm)
@@ -271,17 +271,17 @@ convertMatToDfForGlmFormat <- function(list_matrices){
 #'
 #' @return A list of matrices
 #'
-splitIntoSubMatrices <- function(Tc, clustered){
+splitIntoSubMatrices <- function(Tc, clusters){
 
 	list_matrices <- list()
 
-	for (i in 1:ncol(clustered$membership)){
+	for (i in 1:max(clusters)){
 		list_matrices[[i]] <- matrix(nrow=0, ncol=ncol(Tc))
 	}
 
 	for (i in 1:nrow(Tc)){
 		rn <- rownames(Tc)[i]
-		clusterOfRow <- clustered$cluster[[rn]]
+		clusterOfRow <- clusters[[rn]]
 
 		list_matrices[[clusterOfRow]] <- rbind(list_matrices[[clusterOfRow]], Tc[i,])
 
