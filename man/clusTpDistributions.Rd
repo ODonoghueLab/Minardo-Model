@@ -6,7 +6,7 @@
 \usage{
 clusTpDistributions(
   Tc,
-  clustered,
+  clusters,
   outfile = "tpDist.pdf",
   pdfHeight = 40,
   pdfWidth = 50,
@@ -16,7 +16,7 @@ clusTpDistributions(
 \arguments{
 \item{Tc}{A matrix containing time course data.}
 
-\item{clustered}{A \code{fclust} object containing the clustering details.}
+\item{clusters}{A vector with same length as number of profiles. The cluster labels are assumed to be numbers, starting from 1.}
 
 \item{outfile}{Name of the output pdf file.}
 

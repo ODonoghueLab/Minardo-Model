@@ -4,12 +4,12 @@
 \alias{calcClusterChng}
 \title{Calculate changes at all intervals within each cluster}
 \usage{
-calcClusterChng(Tc, clustered)
+calcClusterChng(Tc, clusters)
 }
 \arguments{
 \item{Tc}{A matrix containing time course data.}
 
-\item{clustered}{A fclust object containing the clustering details.}
+\item{clusters}{A vector with same length as number of profiles. The cluster labels are assumed to be numbers, starting from 1.}
 }
 \value{
 A list (with same length as number of clusters) containing the Tukey summaries.
@@ -18,5 +18,5 @@ A list (with same length as number of clusters) containing the Tukey summaries.
 Create and run generalised linear models and post-hoc tukey contrasts at all time points for each cluster.
 }
 \seealso{
-\code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object.
+\code{\link[e1071]{cmeans}} for clustering.
 }

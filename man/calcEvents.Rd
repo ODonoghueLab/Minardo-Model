@@ -4,23 +4,34 @@
 \alias{calcEvents}
 \title{Calculate events for the cluster centroids.}
 \usage{
-calcEvents(timeRegions, clustered, phosEventTh = 0.5, dephosEventTh = 0.5)
+calcEvents(
+  timeRegions,
+  clusters,
+  Tc = NA,
+  centroids = NA,
+  phosEventTh = 0.5,
+  dephosEventTh = 0.5
+)
 }
 \arguments{
 \item{timeRegions}{A list containing the time regions information.}
 
-\item{clustered}{A fclust object containing the clustering details.}
+\item{clusters}{A vector with same length as number of profiles. The cluster labels are assumed to be numbers, starting from 1.}
+
+\item{Tc}{A matrix containing time course data (from this centroids are computed, if not provided below).}
+
+\item{centroids}{A matrix containing centroids. If no matrix is provided, the centroid are then compuated, and are a simple average of all the profiles within each cluster. Alternatively, for example, centroids from FCM clustering can be provided where profiles are weighted by the membership score.}
 
 \item{phosEventTh}{Value between 0 and 1, to define the threshold at which a phosphorylation (or increasing) event occurs. Here, a threshold of 0 corresponds to the minimum value within an interval. (Such an event is designated as 1).}
 
 \item{dephosEventTh}{Value between 0 and 1, to define the threshold at which a dephosphorylation (or decreasing) event occurs. A threshold of 0 corresponds to the maximum value within an interval. (Such an event is designated as -1).}
 }
 \value{
-A matrix containing the details of the calculated events for the cluster centroids (time region information is appended to the matrix).
+A matrix containing the details of the calculated events for the cluster centroids (event window information is appended to the matrix).
 }
 \description{
 Calculate events for the cluster centroids.
 }
 \seealso{
-\code{\link{getTimeRegionsWithMaximalChange}} to generate \code{timeRegions}, \code{\link[e1071]{cmeans}} to generate \code{clustered}
+\code{\link{getTimeRegionsWithMaximalChange}} to generate \code{timeRegions}.
 }

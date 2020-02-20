@@ -4,12 +4,12 @@
 \alias{splitIntoSubMatrices}
 \title{Split a matrix into cluster based submatrices.}
 \usage{
-splitIntoSubMatrices(Tc, clustered)
+splitIntoSubMatrices(Tc, clusters)
 }
 \arguments{
 \item{Tc}{A matrix containing time course data.}
 
-\item{clustered}{A fclust object containing the clustering details}
+\item{clusters}{A vector with same length as number of profiles. The cluster labels are assumed to be numbers, starting from 1.}
 }
 \value{
 A list of matrices

@@ -4,12 +4,14 @@
 \alias{plotClusters}
 \title{Plot clusters using a monochromatic low opacity gray colour.}
 \usage{
-plotClusters(Tc, clustered, plotNumCol = 5)
+plotClusters(Tc, clusters, centroids = NA, plotNumCol = 5)
 }
 \arguments{
 \item{Tc}{A matrix containing time course data.}
 
-\item{clustered}{A fclust object containing the clustering details}
+\item{clusters}{A vector with same length as number of profiles. The cluster labels are assumed to be numbers, starting from 1.}
+
+\item{centroids}{A matrix containing centroids. If no matrix is provided, the centroid are then compuated, and are a simple average of all the profiles within each cluster. Alternatively, for example, centroids from FCM clustering can be provided where profiles are weighted by the membership score.}
 
 \item{plotNumCol}{Number of cluster-plots to display within a given row.}
 }
@@ -20,5 +22,5 @@ None
 Using this colour scheme enables the clear visualisation of the density of profiles within each cluster.
 }
 \seealso{
-\code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object.
+\code{\link[e1071]{cmeans}} for generating clusters.
 }

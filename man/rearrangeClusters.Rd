@@ -4,19 +4,19 @@
 \alias{rearrangeClusters}
 \title{Rearrange clusters by events}
 \usage{
-rearrangeClusters(clustered, theOrder)
+rearrangeClusters(clusters, theOrder)
 }
 \arguments{
-\item{clustered}{A fclust object containing the clustering details.}
+\item{clusters}{A vector with same length as number of profiles. The cluster labels are assumed to be numbers, starting from 1.}
 
 \item{theOrder}{A list containing information regarding the order of events and clusters generated via the \code{calculateOrder} function.}
 }
 \value{
-The \code{clustered} object which now encodes the rearranged cluster information according to the computed ordering in \code{theOrder}.
+The returned vector now contains the cluster rearranged according to the computed ordering in \code{theOrder}.
 }
 \description{
 After calculating the order of events, we can now rearrange clusters, so that the first cluster contains the first event and so on.
 }
 \seealso{
-\code{\link[e1071]{cmeans}} for clustering time profiles, \code{\link{calculateOrder}} to generate the order.
+\code{\link[e1071]{cmeans}} for clustering, \code{\link{calculateOrder}} to generate the order.
 }

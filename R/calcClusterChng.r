@@ -5,7 +5,7 @@
 #' Create and run generalised linear models and post-hoc tukey contrasts at all time points for each cluster.
 #'
 #' @param Tc A matrix containing time course data.
-#' @param clustered A fclust object containing the clustering details.
+#' @param clusters A vector with same length as number of profiles. The cluster labels are assumed to be numbers, starting from 1.
 #'
 #' @return A list (with same length as number of clusters) containing the Tukey summaries.
 #'
@@ -15,7 +15,7 @@
 #' @importFrom methods is
 #'
 #'
-#' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles and generating the \code{clustered} object.
+#' @seealso \code{\link[e1071]{cmeans}} for clustering.
 #'
 #' @export
 calcClusterChng <- function(Tc, clusters){
@@ -267,7 +267,7 @@ convertMatToDfForGlmFormat <- function(list_matrices){
 #' Split a matrix into cluster based submatrices.
 #'
 #' @param Tc A matrix containing time course data.
-#' @param clustered A fclust object containing the clustering details
+#' @param clusters A vector with same length as number of profiles. The cluster labels are assumed to be numbers, starting from 1.
 #'
 #' @return A list of matrices
 #'
