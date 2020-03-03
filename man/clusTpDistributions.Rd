@@ -7,10 +7,10 @@
 clusTpDistributions(
   Tc,
   clusters,
-  outfile = "tpDist.pdf",
-  pdfHeight = 40,
-  pdfWidth = 50,
-  bandwidth = 0.25
+  outfile = "abundanceDistributions.pdf",
+  pdfHeight = 10,
+  pdfWidth = 10,
+  bandwidth = 0.5
 )
 }
 \arguments{

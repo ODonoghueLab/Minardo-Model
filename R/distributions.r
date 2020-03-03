@@ -15,7 +15,7 @@
 #'
 #' @importFrom methods is
 #' @importFrom stats density
-#' @importFrom graphics polygon plot axis title par
+#' @importFrom graphics polygon plot axis
 #' @importFrom grDevices pdf dev.off
 #'
 #'
@@ -23,37 +23,46 @@
 #' @seealso \code{\link[e1071]{cmeans}} for clustering time profiles.
 #'
 #' @export
-clusTpDistributions <- function(Tc, clusters, outfile="tpDist.pdf",pdfHeight=40, pdfWidth=50, bandwidth=0.25){
-
-	stopifnot(is(Tc, "matrix"), (length(clusters) == nrow(Tc)))
+clusTpDistributions <- function(Tc, clusters, outfile="abundanceDistributions.pdf", pdfHeight=10, pdfWidth=10, bandwidth=0.5){
 
 	list_matricies <- splitIntoSubMatrices(Tc, clusters)
 
-	# return(list_matricies);
 
 	pdf(outfile, height=pdfHeight, width=pdfWidth)
-	par(mfrow = c(length(list_matricies), ncol(Tc)))
+	# par(mfrow = c(1, 1))
+
+
+
+	plot(0, 0, ylim=c(0, 1.5), xlim=c(-3,3), yaxs="i", ylab="Density", main="Standardized distributions of standardized abundances at each time point for every cluster", xaxt="n", bty="n", yaxt="n", pch='.', xlab="Standardized abundance")
+	axis(side =1 ,  at = seq(floor(min(Tc)), ceiling(max(Tc)), 1)) # x-axis label
+
 
 	for (clusNum in 1:length(list_matricies)){
-		for (tp in 1:ncol(list_matricies[[clusNum]])){
-			d <- stats::density( list_matricies[[clusNum]][,tp], bw=bandwidth)  #list_matricies[[clusNum]][,tp], breaks=50, col='gray', ylab="Count", main=NULL, ylim=c(0,50))
-			plot(d, ylim=c(0, 1.5), xlim=c(-3,3), yaxs="i", ylab=paste("Cluster " , clusNum), main="", xaxt="n", bty="n", yaxt="n")
-			if (clusNum == 1){
-				title(main=colnames(Tc)[tp])
-			}
-			if(clusNum == length(list_matricies)){
-				axis(side =1 ,  at = seq(floor(min(Tc)), ceiling(max(Tc)), 1))
-			}
-			else{
-				axis(1, col.ticks = 1, labels=FALSE)
-			}
-			polygon(d, col="gray", border="gray")
 
+		for(tp in 1:ncol(list_matricies[[clusNum]])){
+			tpMean <- mean(list_matricies[[clusNum]][,tp])
+			tpSd <- sd(list_matricies[[clusNum]][,tp])
+
+			standTpVals <- (list_matricies[[clusNum]][,tp] - tpMean)/tpSd
+
+			d <- stats::density(standTpVals, bw=bandwidth)
+
+
+			lines(d, col=rgb(0.7, 0.7, 0.7), lwd=0.25, xaxt="n", yaxt="n")
 		}
 	}
 
+	x <- seq(-3, 3, length=100)
+	# x <- seq(-3, 3, by = 0.05)
+	y <- dnorm(x, mean = 0, sd = 1)
+
+	lines(x, y, xaxt="n", yaxt="n")
+
 	dev.off()
 }
+
+
+
 
 
 #' @title

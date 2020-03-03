@@ -281,6 +281,7 @@ splitIntoSubMatrices <- function(Tc, clusters){
 
 	for (i in 1:nrow(Tc)){
 		rn <- rownames(Tc)[i]
+		# print(rn)
 		clusterOfRow <- clusters[[rn]]
 
 		list_matrices[[clusterOfRow]] <- rbind(list_matrices[[clusterOfRow]], Tc[i,])
