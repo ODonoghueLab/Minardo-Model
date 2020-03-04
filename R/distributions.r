@@ -14,7 +14,7 @@
 #'
 #'
 #' @importFrom methods is
-#' @importFrom stats density
+#' @importFrom stats density dnorm sd
 #' @importFrom graphics polygon plot axis
 #' @importFrom grDevices pdf dev.off
 #'
@@ -87,7 +87,7 @@ clusTpDistributions <- function(Tc, clusters, outfile="abundanceDistributions.pd
 #' @importFrom stats density
 #' @importFrom graphics legend polygon plot axis title lines par
 #' @importFrom shape Arrows
-#' @importFrom grDevices pdf dev.off
+#' @importFrom grDevices pdf dev.off rgb
 #'
 #'
 #'
