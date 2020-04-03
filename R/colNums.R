@@ -9,7 +9,9 @@ cols_orderedEvents = c(cols_matFifty, col_order=7)
 
 cols_timeReg <- list(cluster=1, zScore=2, tpStart=3, tpEnd=4, dir=5)
 
-colors_orderedEvents = list(incr = "#e6aeae", decr=rgb(0,0,0,alpha=0)) # incr color #F78A72
+colors_orderedEvents = list(incr = "#e6aeae", decr=rgb(0,0,0,alpha=0))
+
+colors_orderedEventsNew = list(incr_phos = "#e6aeae", incr_prot = "#89d8d0", incr_rnaSeq="#d7aeff", decr=rgb(0,0,0,alpha=0)) # incr color #F78A72
 #
 color_events = list(up="#ea3424", down="#C99999")
 color_eventDist = list(up=rgb(1, 0, 0, 0.5), down=rgb(0, 0, 1, 0.5))

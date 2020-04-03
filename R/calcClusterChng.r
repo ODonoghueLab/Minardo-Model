@@ -187,6 +187,102 @@ plotZP <- function(list_concTpSummary, significanceTh=0.05){
 	return (matToPlot)
 }
 
+plotZP_eachCluster <- function(list_resSummaries, Tc, glmTukeyForEachClus){
+
+
+	# stopifnot(is(list_resSummaries,"clusterChange"), is(Tc, "matrix"))
+
+	list_matsToPlot <- list()
+
+
+	for (clusNum in 1:length(list_resSummaries)){
+		mat_aClus <- matrix(nrow=ncol(Tc), ncol=ncol(Tc))
+
+		# names_r <- c()
+		# names_c <- c()
+		# for (i in length(glmTukeyForEachClus[[clusNum]]$test$tstat)){
+
+		# }
+
+		for (tp2 in 1:ncol(Tc)){
+			for (tp1 in tp2:ncol(Tc)){
+				if (tp2 != tp1){
+					# print(paste(tp1, '-', tp2))
+					selName = paste(tp1, "-", (tp2))
+
+					# names_r <- c(names_r, paste(colnames(Tc)[tp1], '-', colnames(Tc)[tp2]))
+
+					mat_aClus[tp1, tp2] = as.numeric(glmTukeyForEachClus[[clusNum]]$test$tstat[selName])
+
+
+					mat_aClus[tp2, tp1] = -1 * as.numeric(glmTukeyForEachClus[[clusNum]]$test$tstat[selName])
+				}
+				else{
+					mat_aClus[tp1, tp2] = 0
+				}
+			}
+		}
+		# print(names_r)
+		colnames(mat_aClus) <- colnames(Tc)
+		rownames(mat_aClus) <- colnames(Tc)
+		list_matsToPlot[[clusNum]] <- mat_aClus
+
+	}
+	doThePlotting(list_matsToPlot)
+	return (list_matsToPlot)
+}
+
+getAbsMaxValue <- function(list_matsToPlot){
+
+	largestAbsVal <- 0
+	for (clusNum in 1:length(list_matsToPlot)){
+		newMax <- max(abs(list_matsToPlot[[clusNum]]))
+
+		if (newMax > largestAbsVal){
+			largestAbsVal <- newMax
+		}
+	}
+
+	return (largestAbsVal)
+}
+
+doThePlotting <- function(list_matsToPlot){
+
+	pdf("allByAllHeatmaps.pdf", height=10, width=10)
+
+	par(mfrow=c(ceiling(length(list_matsToPlot)/8), 8))
+
+	rwb <- grDevices::colorRampPalette(colors = c("blue", "#cfcfcf", "red"))(n=99)
+
+	largestAbsVal <- getAbsMaxValue(list_matsToPlot)
+	zscore_largest <- ceiling(largestAbsVal)
+
+	theBreaks <- sort(seq(-zscore_largest, zscore_largest, length.out=100))
+
+	print(theBreaks)
+
+	for (clusNum in 1:length(list_matsToPlot)){
+
+
+
+
+		# zscore_largest_noSignif <- max(c(abs(max(matToPlot[!theSignifs])), abs(min(matToPlot[!theSignifs]))))
+		# idx_forGray50 <- theBreaks <= zscore_largest_noSignif & theBreaks >= -zscore_largest_noSignif
+
+
+		# rwb[idx_forGray50] <- "#cfcfcf"
+
+		# matToPlot[!theSignifs] <- NA
+
+		titleTxt = paste("Cluster ", clusNum, sep="")
+
+		gplots::heatmap.2(list_matsToPlot[[clusNum]], main=titleTxt, xlab="Time interval", ylab="Time interval", Rowv=FALSE, Colv=FALSE, dendrogram="none", col=rwb, na.color="#cfcfcf", tracecol=NA, density.info="none", sepcolor="#cfcfcf", sepwidth=c(0.001, 0.001), colsep=0:ncol(list_matsToPlot[[clusNum]]), rowsep=0:nrow(list_matsToPlot[[clusNum]]), srtCol=45, cexCol=0.8, breaks=theBreaks)
+	}
+	dev.off()
+}
+
+
+
 
 ##################################### PRIVATE FUNCTIONS
 #' Run tukey post-hoc evaluations for the glm's.

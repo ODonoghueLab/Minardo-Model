@@ -162,6 +162,8 @@ visualizeOrder <- function(theOrder){
 
 	# plotting values
 	list_blocks <- getRectBlock(list_eventsOrder, signifs)
+	# print(list_blocks)
+
 	mat_eventPoints <- getTheClusLines(mat_events_withOrder, list_eventsOrder, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, lineDiff_y)
 
 	eventEnd_x = max(as.numeric(mat_eventPoints[,cols_matFifty$col_x])) #  + blockSpacingFmEvent_x
@@ -174,6 +176,7 @@ visualizeOrder <- function(theOrder){
 
 
 	mat_grayLines <- getGrayLines(mat_eventPoints, signifs)
+
 	mat_grayLines_v2 <- getGrayLines_v2(list_eventsOrder, mat_eventPoints, signifs)
 
 
@@ -184,9 +187,12 @@ visualizeOrder <- function(theOrder){
 
 	mat_xLabelsClus <- getXaxisLabels(list_eventsOrder, mat_eventPoints, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, yLabelInit, yLabelSpace);
 
-	# a set of points to set up the graph.
-	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Clusters",  main=paste("Temporal order of events in clusters", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n", cex.main = 0.8) #,
 
+
+	# a set of points to set up the graph.
+	# print(mat_eventPoints)
+	graphics::plot(mat_eventPoints[,cols_matFifty$col_x], mat_eventPoints[,cols_matFifty$col_y], asp=NA, yaxt="n", lwd=0.25, col=colors_orderedEvents$incr, pch=".", xlab="Temporal order", ylab="Clusters",  main=paste("Temporal order of events in clusters", title_testType, sep=""), xlim=c(eventStart_x, eventEnd_x), ylim=c(-4, max(as.numeric(mat_eventPoints[,cols_matFifty$col_clus]))), xaxt="n", bty="n", cex.main = 0.8) #,
+	# print("over here..")
 	# background gray rectangles.
 	if (nrow(mat_bgRects) > 0){
 		for (rowNum in 1:nrow(mat_bgRects)){
@@ -937,7 +943,7 @@ getGrayLines <- function(mat_eventPoints, signifs){
 			}
 		}
 	}
-	theGrayLines <- theGrayLines[-1,]
+	theGrayLines <- theGrayLines[-1,,drop=F]
 
 	return (theGrayLines)
 }
@@ -996,9 +1002,17 @@ getRectBlock <- function(list_eventsOrder, signifs){
 			#		if (list_blocks[[length(list_blocks)]])
 			#	}
 
-				if (length(prevBlock) > 0 && length(currBlock) > 0 && isAnyNonSignifFromPrev(currBlock, prevBlock, signifs) == TRUE){
+				if (length(list_blocks) > 0 && length(prevBlock) > 0 && length(currBlock) > 0 && isAnyNonSignifFromPrev(currBlock, prevBlock, signifs) == TRUE){
 
-					prevBlock <- prevBlock[!prevBlock == list_blocks[[length(list_blocks)]]]
+					# print(length(list_blocks))
+					# theCurrVec = list_blocks[[length(list_blocks)]]
+					# theIdx = prevBlock == theCurrVec
+
+					# print(theCurrVec)
+					# print(prevBlock)
+
+					# prevBlock <- prevBlock[!theIdx]
+					prevBlock <- setdiff(prevBlock, list_blocks[[length(list_blocks)]])
 					# prevBlock <- prevBlock[!prevBlock == joiningEvents]
 					currBlock <- c(currBlock, list_blocks[[length(list_blocks)]])
 					list_blocks <- list_blocks[-length(list_blocks)]
@@ -1007,19 +1021,20 @@ getRectBlock <- function(list_eventsOrder, signifs){
 			}
 
 			# print(currBlock)
-			if (any(currBlock %in% list_blocks[[length(list_blocks)]]) == TRUE && all(currBlock %in% list_blocks[[length(list_blocks)]]) == FALSE ){
+			if (length(list_blocks) > 0 && any(currBlock %in% list_blocks[[length(list_blocks)]]) == TRUE && all(currBlock %in% list_blocks[[length(list_blocks)]]) == FALSE ){
 				list_blocks[[length(list_blocks)]] <- currBlock
 			}
-			else if (all(currBlock %in% list_blocks[[length(list_blocks)]]) == FALSE){
+			else if (length(list_blocks) > 0 && all(currBlock %in% list_blocks[[length(list_blocks)]]) == FALSE){
 				list_blocks[[length(list_blocks)+1]] <- currBlock
 			}
 
 		}
 		# print("list blocks in getRectBlock")
 		# print(list_blocks)
-
-		# print(rectPoints)
+		# print("The list_blocks")
+		# print(list_blocks)
 		return (list_blocks)
+
 
 }
 
