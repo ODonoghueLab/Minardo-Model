@@ -96,6 +96,7 @@ clusTpDistributions <- function(Tc, clusters, outfile="abundanceDistributions.pd
 #' @export
 eventDistributions <- function(Tc, clusters, mat_events, phosEventTh, dephosEventTh, outfile="eventDistributions.pdf", pdfHeight=35, pdfWidth=10, bandwidth=0.25) {
 
+
 	stopifnot(is(Tc, "matrix"), (length(clusters) == nrow(Tc)), is(mat_events, "matrix"), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1))
 
 	list_matricies <- splitIntoSubMatrices(Tc, clusters)
@@ -141,6 +142,8 @@ eventDistributions <- function(Tc, clusters, mat_events, phosEventTh, dephosEven
 			}
 
 			plotArrows(d, mat_events, eventNum, eventCol, adjustment);
+			# Update event from centroid-event to median-event.
+			mat_events[eventNum, cols_matFifty_v2$x] = d$x_med
 		}
 
 		else {
@@ -169,6 +172,9 @@ eventDistributions <- function(Tc, clusters, mat_events, phosEventTh, dephosEven
 
 			plotArrows(d, mat_events, eventNum, eventCol, adjustment);
 
+			# Update event from centroid-event to median-event.
+			mat_events[eventNum, cols_matFifty_v2$x] = d$x_med
+
 			if (eventNum == 1){
 				 graphics::legend("topright", c("Increasing event", "Decreasing event", "Median density", "Mean density"), col=c(color_eventDist$up, color_eventDist$down, 'black', 'black'), lwd=c(10,10, 1, 1), lty=c(1, 1, 1, 2))
 			}
@@ -183,6 +189,8 @@ eventDistributions <- function(Tc, clusters, mat_events, phosEventTh, dephosEven
 	}
 
 	dev.off()
+
+	return (mat_events)
 }
 
 plotArrows <- function(d, mat_events, eventNum, eventCol, adjustment){

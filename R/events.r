@@ -132,7 +132,7 @@ calcEvents <- function(timeRegions, clusters, Tc=NA, centroids=NA, phosEventTh=0
 
 	stopifnot(is(timeRegions, "list"), (length(clusters) == nrow(Tc)), (phosEventTh >= 0 && phosEventTh <= 1), (dephosEventTh >= 0 && dephosEventTh <= 1), ( (!is.na(centroids)) || (is.na(centroids) && !is.na(Tc))) )
 
-	mat_fiftyPoints <- matrix(ncol=6) # cluster, time, abundance, dir, startTp, endTp
+	mat_fiftyPoints <- matrix(ncol=length(Col_events), data=NA) # see Col_events
 
 	if (is.na(centroids)){
 		centroids = calcAvgOfClusProf(Tc, clusters)
@@ -144,6 +144,8 @@ calcEvents <- function(timeRegions, clusters, Tc=NA, centroids=NA, phosEventTh=0
 			for (i in 1:nrow(timeRegions[[clusNum]])){
 				startTp = as.integer(min(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
 				endTp = as.integer(max(timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
+
+				# print(paste("StartTp: ", startTp, endTp, timeRegions[[clusNum]][i, cols_timeReg$tpStart], timeRegions[[clusNum]][i, cols_timeReg$tpEnd]))
 
 				crossPt <- calcCrossing_v3(centroids[clusNum, startTp:endTp], timeRegions[[clusNum]][i, cols_timeReg$dir], (startTp -1), phosEventTh, dephosEventTh)
 
@@ -157,15 +159,18 @@ calcEvents <- function(timeRegions, clusters, Tc=NA, centroids=NA, phosEventTh=0
 
 	mat_fiftyPoints <- mat_fiftyPoints[-1,,drop=FALSE]
 
-	mat_fiftyPoints <- mat_fiftyPoints[order(mat_fiftyPoints[,1],mat_fiftyPoints[,2]),] # order by cluster, then time; else issue in downstream function (as only subsequent events are checked over there)
+	# print(mat_fiftyPoints)
+	mat_fiftyPoints <- mat_fiftyPoints[order(mat_fiftyPoints[,Col_events$clus],mat_fiftyPoints[,Col_events$x]),] # order by cluster, then time; else issue in downstream function (as only subsequent events are checked over there)
 
-	colnames(mat_fiftyPoints) <- c("Cluster", "Time", "Th. abundance", "Direction", "Start interval", "End interval")
+	colnames(mat_fiftyPoints) <- c("Cluster", "Time", "Th. abundance", "Direction", "Start interval", "End interval", "Order", "CombinedDatasetNum")
 
 	return (mat_fiftyPoints)
 }
 
 addToMatrixWithRegionInfo <- function(theMat, clusNum, x_50, y_50, direction, tpStart, tpEnd){
-	theMat <- rbind(theMat, c(clusNum, x_50, y_50, direction, tpStart, tpEnd))
+	theRow <- c(clusNum, x_50, y_50, direction, tpStart, tpEnd, NA, NA)
+	theMat <- rbind(theMat, theRow)
+	rownames(theMat)[nrow(theMat)] <- ''
 	return (theMat)
 }
 

@@ -70,7 +70,6 @@ calculateOrder <- function(Tc, clusters, mat_events, test="wilcox", fdrSignif=0.
 
 	# Convert to adjacency matrix.
 	signifs <- mat_pValsFDR < fdrSignif
-
 	statistic_t <- list_pVal_stat[[2]]
 	statistic_t[!signifs] <- NA
 
@@ -371,16 +370,16 @@ topSemiCircleEq <- function(xPts, yCentPos){
 
 appendOrder <- function(mat_fiftyPoints, list_eventsOrder){
 
-	mat_withOrder <- cbind(mat_fiftyPoints, rep(0,nrow(mat_fiftyPoints)))
+	# mat_withOrder <- cbind(mat_fiftyPoints, rep(0,nrow(mat_fiftyPoints)))
 
 	for (i in 1:length(list_eventsOrder)){
 		eventNum <- list_eventsOrder[[i]]
 
-		mat_withOrder[eventNum, cols_orderedEvents$col_order] = i
+		mat_fiftyPoints[eventNum, Col_events$order] = i
 	}
 
-	colnames(mat_withOrder)[cols_orderedEvents$col_order] = "order";
-	return(mat_withOrder)
+	colnames(mat_fiftyPoints)[Col_events$order] = "order";
+	return(mat_fiftyPoints)
 }
 
 ################################## AUXILLARY
@@ -437,7 +436,47 @@ checkAndAddEventAtEnd <- function(anEvent, list_newEventsOrder){
 	return(list_newEventsOrder)
 }
 
+
 rmElemAndAddSepElseNew <- function(list_newEventsOrder, theElem, theVec){
+	# print("The eleme is ")
+	# print(theElem)
+
+	isDeleted = FALSE
+	for (i in 1:length(list_newEventsOrder)){
+		if (theElem %in% list_newEventsOrder[[i]]){
+			idx = match(theElem, list_newEventsOrder[[i]])
+			# print(" the idx is ")
+			# print(idx)
+			if (idx > 0){
+
+				if (length (list_newEventsOrder[[i]]) > 1){
+					list_newEventsOrder[[i]] <- list_newEventsOrder[[i]][-idx]
+					isDeleted = TRUE
+				}
+
+				if (length(list_newEventsOrder[[i]]) == 0){
+					print("Need to delete this here....?")
+					list_newEventsOrder <- list_newEventsOrder[-i]
+				}
+			}
+
+
+		}
+	}
+	if (isDeleted == TRUE){
+		for (i in 1:length(list_newEventsOrder)){
+			if (length(list_newEventsOrder[[i]]) == 0){
+				list_newEventsOrder <- Filter(Negate(is.null), list_newEventsOrder)
+			}
+		}
+		list_newEventsOrder <- append(list_newEventsOrder, c(theElem))
+	}
+
+	return (list_newEventsOrder)
+}
+
+
+rmElemAndAddSepElseNew_old <- function(list_newEventsOrder, theElem, theVec){
 	# print("The eleme is ")
 	# print(theElem)
 	for (i in 1:length(list_newEventsOrder)){
@@ -457,6 +496,7 @@ rmElemAndAddSepElseNew <- function(list_newEventsOrder, theElem, theVec){
 
 	return (list_newEventsOrder)
 }
+
 
 isVecInList <- function(theVec, theList, elemToRm){
 
@@ -851,12 +891,18 @@ getXaxisLabels <- function(list_eventsOrder, mat_eventPoints, signifs, list_bloc
 
 		sortedEvents <- getSortedEventsByY(list_eventsOrder[[i]], mat_eventPoints)
 
-		for (event in sortedEvents){
-			col = color_events$up
 
-			if (mat_eventPoints[event, cols_matFifty$col_dir] != colors_orderedEvents$incr){
-				col = color_events$down
-			}
+		for (event in sortedEvents){
+
+			# print(mat_eventPoints[event, cols_matFifty$col_dir])
+
+			col = mat_eventPoints[event, cols_matFifty$col_dir]
+			# col = color_events$up
+
+			# if (mat_eventPoints[event, cols_matFifty$col_dir] != colors_orderedEvents$incr){
+			# 	col = color_events$down
+			# }
+
 			rowVal = c(x0, y0, mat_eventPoints[event, cols_matFifty$col_clus], col)
 			mat_xLabelsClus <- rbind(mat_xLabelsClus, rowVal)
 
@@ -1059,6 +1105,26 @@ addToRectPoints <- function(rectPoints, events, mat_eventPoints){
 }
 
 
+makeDecrBarOpaque <- function(mat_clusConnLines, isCombined){
+
+	if (isCombined == TRUE){
+		for (i in 1:length(Color_multiomics)){
+			idx <- mat_clusConnLines[,cols_clusPlotObjs$col_col] == Color_multiomics[[i]]$decr
+
+			mat_clusConnLines[idx,cols_clusPlotObjs$col_col] = colors_orderedEvents$decr
+
+
+
+			idx <- mat_clusConnLines[,cols_clusPlotObjs$col_col] == Color_multiomics[[i]]$incr
+
+			mat_clusConnLines[idx,cols_clusPlotObjs$col_col] = Color_multiomics[[i]]$bar
+
+		}
+	}
+
+	return (mat_clusConnLines)
+}
+
 
 getClusConnLines <- function(mat_eventPoints, xStart, xEnd){
 	mat_clusConnLines = matrix(ncol=5,nrow=nrow(mat_eventPoints))
@@ -1134,8 +1200,21 @@ getOppColor <- function (thisCol){
 	if (thisCol == colors_orderedEvents$incr){
 		return (colors_orderedEvents$decr)
 	}
+	else if (thisCol == colors_orderedEvents$decr){
+		return (colors_orderedEvents$incr)
+	}
 
-	return (colors_orderedEvents$incr)
+	# multiomics colors
+	for (i in 1:length(Color_multiomics)){
+		if (thisCol == Color_multiomics[[i]]$incr){
+			return (Color_multiomics[[i]]$decr)
+		}
+		else if (thisCol == Color_multiomics[[i]]$decr){
+			return (Color_multiomics[[i]]$incr)
+		}
+	}
+
+	return ("black")
 }
 
 getTheEndX <- function(mat_eventPoints, eventNum, defaultEndX){
@@ -1197,6 +1276,27 @@ isAnyNonSignifFromPrevAll <- function(list_eventsOrder, currLayerNum, signifs){
 }
 
 
+getColorIfMultiOmics <- function(eventNum, mat_events, dir){
+	datasetNum <- mat_events[eventNum, Col_events$combinedDatasetNum]
+
+	if (is.na(datasetNum) && dir == 1){
+		return(color_events$up)
+	}
+	else if (is.na(datasetNum) && dir == -1){
+		return(color_events$down)
+	}
+
+
+	# otherwise its a multiomics data sets.
+	if (dir == 1){
+		return(Color_multiomics[[datasetNum]]$incr)
+	}
+
+	else if(dir == -1){
+		return(Color_multiomics[[datasetNum]]$decr)
+	}
+
+}
 
 
 getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs, list_blocks, xStart, xIncrSig, xIncrNonSig, yDecr){ #xStart, yStart, y_decr, x_incr_sig, x_incr_nonSig
@@ -1224,12 +1324,15 @@ getTheClusLines <- function(mat_fiftyPoints, list_eventsOrder, signifs, list_blo
 
 			# assigning color
 
-			if (mat_fiftyPoints[eventNum, cols_matFifty$col_dir] == 1){
-				mat_eventPoints[eventNum, cols_matFifty$col_dir] = colors_orderedEvents[['incr']]
-			}
-			else{
-				mat_eventPoints[eventNum, cols_matFifty$col_dir] = colors_orderedEvents[['decr']]
-			}
+			# if (mat_fiftyPoints[eventNum, cols_matFifty$col_dir] == 1){
+			theColor <- getColorIfMultiOmics(eventNum, mat_fiftyPoints, mat_fiftyPoints[eventNum, cols_matFifty$col_dir])
+
+			mat_eventPoints[eventNum, cols_matFifty$col_dir] = theColor
+			# }
+			#else{
+			#	theColor <- getColorIfMultiOmics(eventNum, mat_fiftyPoints, -1)
+			#	mat_eventPoints[eventNum, cols_matFifty$col_dir] = theColor
+			#}
 
 			# assigning cluster number
 			mat_eventPoints[eventNum, cols_matFifty$col_clus] <- mat_fiftyPoints[eventNum, cols_matFifty$col_clus]
@@ -1303,6 +1406,8 @@ isAnyNonSignifFromPrev <- function(vec_curr, vec_prev, signifs){
 
 	for (i in 1:length(vec_curr)){
 		for (j in 1:length(vec_prev)){
+
+			# print(paste(i, j, length(vec_curr), length(vec_prev), signifs[vec_curr[i], vec_prev[j]]))
 
 			if (signifs[vec_curr[i], vec_prev[j]] == FALSE){
 				return (TRUE)
