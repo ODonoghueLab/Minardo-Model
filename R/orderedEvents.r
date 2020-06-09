@@ -165,6 +165,7 @@ visualizeOrder <- function(theOrder){
 
 	mat_eventPoints <- getTheClusLines(mat_events_withOrder, list_eventsOrder, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, lineDiff_y)
 
+
 	eventEnd_x = max(as.numeric(mat_eventPoints[,cols_matFifty$col_x])) #  + blockSpacingFmEvent_x
 	blockEnd_x = eventEnd_x + blockSpacingFmEvent_x
 
@@ -181,6 +182,8 @@ visualizeOrder <- function(theOrder){
 
 	mat_clusConnLines <- getClusConnLines(mat_eventPoints, blockStart_x, blockEnd_x)
 
+	mat_clusConnLines <- makeDecrBarOpaque(mat_clusConnLines, FALSE)
+	# print(mat_clusConnLines)
 	vec_labels <- getYaxisLabels(mat_eventPoints)
 
 
@@ -1122,6 +1125,16 @@ makeDecrBarOpaque <- function(mat_clusConnLines, isCombined){
 		}
 	}
 
+	if (isCombined == FALSE){
+		idx <- mat_clusConnLines[,cols_clusPlotObjs$col_col] == color_events$down
+
+		mat_clusConnLines[idx,cols_clusPlotObjs$col_col] = colors_orderedEvents$decr
+
+		idx <- mat_clusConnLines[,cols_clusPlotObjs$col_col] == color_events$up
+
+		mat_clusConnLines[idx,cols_clusPlotObjs$col_col] = colors_orderedEvents$incr
+	}
+
 	return (mat_clusConnLines)
 }
 
@@ -1197,11 +1210,12 @@ getClusConnLines <- function(mat_eventPoints, xStart, xEnd){
 }
 
 getOppColor <- function (thisCol){
-	if (thisCol == colors_orderedEvents$incr){
-		return (colors_orderedEvents$decr)
+	# omics colors
+	if (thisCol == color_events$up){
+		return (color_events$down)
 	}
-	else if (thisCol == colors_orderedEvents$decr){
-		return (colors_orderedEvents$incr)
+	else if (thisCol == color_events$down){
+		return (color_events$up)
 	}
 
 	# multiomics colors

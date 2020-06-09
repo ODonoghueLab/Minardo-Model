@@ -336,12 +336,55 @@ visualizeOrder_combined <- function(theOrder){
 
 	# x label text.
 	mat_xLabelsClus <- getXaxisLabels(list_eventsOrder, mat_eventPoints, signifs, list_blocks, eventStart_x, sigEventsDiff_x, nonSigEventsDiff_x, yLabelInit, yLabelSpace);
+	print(as.numeric(mat_xLabelsClus[,3]))
 
+	mat_xLabels <- adjustLabelsByDataset(mat_events_withOrder, as.numeric(mat_xLabelsClus[,3]))
+
+	mat_xLabelsClus[,3] <- mat_xLabels[,Col_labels$label]
 
 	graphics::text(x=as.numeric(mat_xLabelsClus[,1]), y=as.numeric(mat_xLabelsClus[,2]), labels=mat_xLabelsClus[,3], offset=0, cex=0.5, col=mat_xLabelsClus[,4])
 
 
 }
+
+
+adjustLabelsByDataset_forMat <- function(mat_events_withOrder, vec_labels){
+	mat_labels = matrix(ncol=2, nrow=length(vec_labels))
+
+
+	for (i in 1:length(vec_labels)){
+		# print(vec_labels[i])
+		datasetNums <- mat_events_withOrder[mat_events_withOrder[,Col_events$clus] == vec_labels[i],Col_events$combinedDatasetNum]
+
+
+		dsNum = datasetNums[1]
+
+		if (dsNum > 1) {
+			theRows <- mat_events_withOrder[,Col_events$combinedDatasetNum] == (dsNum - 1)
+
+			maxClusNumOfPrev <- max(mat_events_withOrder[theRows, Col_events$clus])
+
+
+			adjustedClusNum <- vec_labels[i] - maxClusNumOfPrev
+
+			mat_labels[i, Col_labels$label] = adjustedClusNum
+			mat_labels[i, Col_labels$color] = Color_multiomics[[dsNum]]$incr
+
+			# print(paste(vec_labels[i], dsNum, maxClusNumOfPrev, adjustedClusNum))
+
+
+		}
+		else{
+			mat_labels[i, Col_labels$label] = vec_labels[i]
+			mat_labels[i, Col_labels$color] = Color_multiomics[[dsNum]]$incr
+
+		}
+
+	}
+
+	return(mat_labels)
+}
+
 adjustLabelsByDataset <- function(mat_events_withOrder, vec_labels){
 	mat_labels = matrix(ncol=2, nrow=length(vec_labels))
 
@@ -379,32 +422,6 @@ adjustLabelsByDataset <- function(mat_events_withOrder, vec_labels){
 	return(mat_labels)
 }
 
-blah <- function(){
-	for (i in 1:length(vec_labels)){
-		# get data set num of clusNum
-		theRows <- mat_events_withOrder[,Col_events$clus] == vec_labels[i]
-
-		# print(theRows)
-		dataSetNum <- mat_events_withOrder[theRows,]
-
-		# print(mat_events_withOrder[theRows,])
-
-		if (length(dataSetNum) > 1){
-			dataSetNum <- dataSetNum[1]
-		}
-
-		print(paste(vec_labels[i], dataSetNum))
-
-		if (dataSetNum > 1){  # get max clus num from prev data set num; then adjust
-			idx = mat_events_withOrder[,Col_events$combinedDatasetNum] = dataSetNum - 1
-
-			maxClusNumOfPrevDataset = max(mat_events_withOrder[idx, Col_events$clus])
-			print(maxClusNumOfPrevDataset)
-			vec_labels[[i]] = vec_labels[[i]] - maxClusNumOfPrevDataset
-		}
-	}
-
-}
 
 
 
