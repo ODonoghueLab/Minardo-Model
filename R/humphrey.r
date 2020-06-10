@@ -11,7 +11,7 @@
 #' }
 #'
 #'
-#' @name humphrey_noDup
+#' @name humphrey
 #' @docType data
 #' @references Humphrey \emph{et al.} 2013. Available at: \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3690479/}
 #' @keywords data

@@ -22,3 +22,5 @@ Imports:
 Suggests:
 	Mfuzz
 RoxygenNote: 7.0.2
+Depends:
+	R (>= 3.5.0)
