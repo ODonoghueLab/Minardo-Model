@@ -9,7 +9,7 @@ This package provides three major analysis techniques for clusters:
 
 The methods presented here can be applied to a wide variety of time-series high-throughput molecular biology datasets. We demonstrate application to a high-throughput time series [phosphoproteomics data set](./phospho.md), a time series [gene expression data set](./ge.md) and a combined [multiomics data set ordering](./multiomics.md).
 
-### Overview (inputs, outputs)
+### Inputs, Outputs
 
 The input consists of a time series data set, and optional cluster labels. If you have not yet clustered your data, then the fuzzy c-means algorithm can be used (see next section).
 
@@ -20,7 +20,7 @@ This can be loaded into R as follows:
 rnaSeqStemClusData <- read.table('RnaSeqData.txt', header=TRUE, sep="\t", row.names=1)
 
 head(rnaSeqStemClusData)
-# Output: 
+# Output:
 #                          X0   X1h   X6h  X12h  X24h  X36h  X48h  X72h
 # ENSMUSG00000000031:H19    0  0.38  0.47  0.55  1.87  2.78  4.18  4.34
 # ENSMUSG00000000037:SCML2  0  0.64  0.92  0.74  0.75  0.71 -0.21 -1.13
