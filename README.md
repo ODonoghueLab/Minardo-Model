@@ -72,6 +72,7 @@ This is an example [ordering for a phosphoproteomics data set](./phospho.md)
 ![Mfuzz clustering](images/Multiomics/combined_order.png)
 This is an example [ordering for a multiomics data set](./multiomics.md).
 
+These images depict the ordering of events using two types of visualisations: event maps (top) and event sparklines (bottom). In the event maps, each horizontal bar represents one cluster, and indicates when it has increased abundance. Each column (gray or white shading) indicates a group of events that occur at significantly different times to all other events. Events with the same horizontal positioning are assessed to occur simultaneously. Dotted gray lines indicate overlapping but non-simultaneous events. Event sparklines summarize the inferred temporal order of events shown in above event map.
 
 
 #### Prerequisite - Mfuzz (for clustering)
