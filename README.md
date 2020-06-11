@@ -11,9 +11,7 @@ The methods presented here can be applied to a wide variety of time-series high-
 
 ### Inputs, Outputs
 
-The input consists of a time series data set, and optional cluster labels. If you have not yet clustered your data, then the fuzzy c-means algorithm can be used (see next section).
-
-The time series data can be a simple tab separated values file, e.g. [file](./RnaSeqData.txt).
+The input consists of a time series data set, and optional cluster labels. If you have not yet clustered your data, then the fuzzy c-means algorithm can be used (see next section). The time series data can be a simple tab separated values file, e.g. [file](./RnaSeqData.txt).
 
 This can be loaded into R as follows:
 ```R
@@ -33,9 +31,7 @@ head(rnaSeqStemClusData)
 
 ```
 
-If you have already clustered your data, then the cluster format required by MinardoModel should be similar to the vector below.
-
-If you have a [file](./rnaSeqClusters.txt) with cluster identifiers, it can be loaded into R as:
+If you have already clustered your data, then the cluster format required by MinardoModel should be similar to the vector below. If you have a [file](./rnaSeqClusters.txt) with cluster identifiers, it can be loaded into R as:
 ```R
 
 rnaSeqClusters <- read.table("rnaSeqClusters.txt", header=TRUE, sep="\t", row.names=1)
@@ -67,10 +63,10 @@ head(rnaSeqClusVec)
 
 The final output is visualisation of identified events as follows:
 ![Event map and event sparkline](images/Humphrey/humphrey_ordered_rearranged.png)
-This is an example [ordering for a phosphoproteomics data set](./phospho.md)
+Fig. 1: Example [ordering for a phosphoproteomics data set](./phospho.md)
 
 ![Mfuzz clustering](images/Multiomics/combined_order.png)
-This is an example [ordering for a multiomics data set](./multiomics.md).
+Fig. 2: Example [ordering for a multiomics data set](./multiomics.md).
 
 These images depict the ordering of events using two types of visualisations: event maps (top) and event sparklines (bottom). In the event maps, each horizontal bar represents one cluster, and indicates when it has increased abundance. Each column (gray or white shading) indicates a group of events that occur at significantly different times to all other events. Events with the same horizontal positioning are assessed to occur simultaneously. Dotted gray lines indicate overlapping but non-simultaneous events. Event sparklines summarize the inferred temporal order of events shown in above event map.
 
